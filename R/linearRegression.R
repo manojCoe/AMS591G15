@@ -56,38 +56,6 @@ mlr <- function(x, y) {
     return(as.data.frame(coefficients))
 }
 
-predict_regression <- function(coefficients, newdata) {
-
-    # Check if coefficients is a matrix
-    if (!is.matrix(coefficients)) {
-        stop("Coefficients must be a matrix.")
-    }
-
-    # Add a column of ones for the intercept term if not present
-    if (ncol(newdata) + 1 == nrow(coefficients)) {
-        newdata <- cbind(1, newdata)
-    }
-
-    # Check if newdata is a matrix and convert if necessary
-    if (!is.matrix(newdata)) {
-        newdata <- as.matrix(newdata)
-    }
-
-    print(paste("class of coefficients: ", class(coefficients)))
-    print(paste("class of newdata: ", class(newdata)))
-
-    print(paste("dim of coef: ", dim(coefficients)))
-    print(paste("dim of y: ", dim(newdata)))
-    # Make predictions
-    predictions <- newdata %*% coefficients
-
-    # Convert predictions to a vector
-    predictions <- as.vector(predictions)
-
-    # Return predictions
-    return(predictions)
-}
-
 linearRegression = function(formula, data = NULL){
     print(paste("data variable exists: ", !is.null(data)))
     formula_vars <- all.vars(formula)
@@ -120,42 +88,4 @@ linearRegression = function(formula, data = NULL){
     return(c(intercept = coefficients[1], slope = coefficients[2]))
 }
 
-#
-df = read.csv("C:/Users/coe16/Downloads/Mystery.csv")
-#
-set.seed(123)
-trainID <- sample(1:nrow(df),round(0.75*nrow(df)))
-trainData <- df[trainID,]
-testData <- df[-trainID,]
-#
-#
-# # formula1 = y ~ x1
-coefficients = linearRegression(y~x2, data = trainData)
-print(coefficients)
-#
-pred = predict_regression(coefficients = as.matrix(coefficients), newdata = as.matrix(testData$x2))
-#
-rmse(pred, testData$y)
-
-model1 = lm(y ~ x2, data = trainData)
-act <- predict(model1, subset(testData, select = x2))
-
-rmse(act, testData$y)
-
-#
-
-X = subset(trainData, select = -y)
-y = as.matrix(trainData$y)
-coefficients3 = mlr(X, y)
-
-testData$x15 = ifelse(testData$x15 == "y", 1, 0)
-
-pred = predict_regression(coefficients = as.matrix(coefficients3), newdata = subset(testData, select = -y))
-#
-rmse(pred, testData$y)
-
-model2 = lm(y ~ ., data = trainData)
-act <- predict(model2, subset(testData, select = -y))
-
-rmse(act, testData$y)
 
