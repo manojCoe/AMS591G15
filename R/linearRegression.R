@@ -1,5 +1,6 @@
  # simple linear regression
 slr <- function(x, y) {
+    print("Inside slr()")
 
     n <- length(x)
 
@@ -20,6 +21,8 @@ slr <- function(x, y) {
 
 # Multiple Linear regression using normal equation
 mlr <- function(x, y) {
+    print("Inside mlr()")
+
     # get all the categorical columns in X
     categoricalColumns = sapply(x, is.character)
 
@@ -28,10 +31,12 @@ mlr <- function(x, y) {
         x = model.matrix(~ ., data = x)
     }
 
+
     if(!is.matrix(x)){
         print("Converting x to a matrix")
         x = as.matrix(x)
     }
+    print(head(x))
 
     # Convert y to a matrix if it's a vector
     if (!is.matrix(y)) {
@@ -57,13 +62,24 @@ mlr <- function(x, y) {
 }
 
 linearRegression = function(formula, data = NULL){
+    print("Inside linearRegression()")
     print(paste("data variable exists: ", !is.null(data)))
     formula_vars <- all.vars(formula)
     print(formula_vars)
+
+    # If data variable is not null
     if(!is.null(data)){
         y_var = as.character(formula_vars[1])
         x_var = as.character(formula_vars[2])
-        x = data[[x_var]]
+
+        # if x_var == ., then consider all the predictor columns in training data.
+        if(x_var == "."){
+            print("consider all the predictor columns in training data")
+            x = subset(data, select = -y)
+        }
+        else{
+            x = data[[x_var]]
+        }
         y = data[[y_var]]
     }
     else{
@@ -76,16 +92,20 @@ linearRegression = function(formula, data = NULL){
     }
     print(paste("x_var: ", x_var))
     print(paste("y_var: ", y_var))
-    x = as.matrix(x)
-    y = as.matrix(y)
 
-    if(dim(x)[2] == 1){
-        coefficients = slr(x,y)
+    # print(paste("dim of x: ", dim(x)))
+    # print(paste("dim of y: ", dim(y)))
+
+    if(dim(x)[2] != 1){
+        coefficients = mlr(x,y)
+        return(coefficients)
     }
     else{
-        coefficients = mlr(x,y)
+        x = as.matrix(x)
+        y = as.matrix(y)
+        coefficients = slr(x,y)
+        return(c(intercept = coefficients[1], slope = coefficients[2]))
     }
-    return(c(intercept = coefficients[1], slope = coefficients[2]))
 }
 
 

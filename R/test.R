@@ -21,14 +21,12 @@ act <- predict(model1, subset(testData, select = x2))
 rmse(act, testData$y)
 
 #
-
-X = subset(trainData, select = -y)
-y = as.matrix(trainData$y)
-coefficients3 = mlr(X, y)
+c3 = linearRegression(y ~ ., trainData)
+c3
 
 testData$x15 = ifelse(testData$x15 == "y", 1, 0)
 
-pred = predict_regression(coefficients = as.matrix(coefficients3), newdata = subset(testData, select = -y))
+pred = predict_regression(coefficients = as.matrix(c3), newdata = subset(testData, select = -y))
 #
 rmse(pred, testData$y)
 
