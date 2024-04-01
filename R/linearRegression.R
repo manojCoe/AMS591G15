@@ -31,7 +31,6 @@ mlr <- function(x, y) {
         x = model.matrix(~ ., data = x)
     }
 
-
     if(!is.matrix(x)){
         print("Converting x to a matrix")
         x = as.matrix(x)
