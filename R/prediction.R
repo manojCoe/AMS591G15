@@ -25,7 +25,6 @@ predict_regression <- function(coefficients, newdata) {
 
     # Convert predictions to a vector
     predictions <- as.vector(predictions)
-
     # Return predictions
     return(predictions)
 }
