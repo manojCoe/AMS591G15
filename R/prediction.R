@@ -1,16 +1,16 @@
 predict_regression <- function(coefficients, newdata) {
 
     # Check if coefficients is a matrix
-    if (!is.matrix(coefficients)) {
-        stop("Coefficients must be a matrix.")
+    if (is.data.frame(coefficients)) {
+        coefficients <- as.matrix(coefficients)
     }
+
 
     # Add a column of ones for the intercept term if not present
     if (ncol(newdata) + 1 == nrow(coefficients)) {
         newdata <- cbind(1, newdata)
     }
-
-    # Check if newdata is a matrix and convert if necessary
+    # Check if y is a data frame and convert it to a matrix if necessary
     if (!is.matrix(newdata)) {
         newdata <- as.matrix(newdata)
     }
@@ -28,3 +28,4 @@ predict_regression <- function(coefficients, newdata) {
     # Return predictions
     return(predictions)
 }
+

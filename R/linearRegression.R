@@ -2,6 +2,9 @@
 slr <- function(x, y) {
     print("Inside slr()")
 
+    # This function call checks if x has categorical columns, converts those columns to dummy variables
+    x = convertCatToNumeric(x)
+
     n <- length(x)
 
     x_mean <- mean(x)
@@ -16,6 +19,7 @@ slr <- function(x, y) {
     coefficients = matrix(c(beta0, beta1), nrow = 1)
 
     # Return coefficients
+    print("Executed slr()")
     return(coefficients)
 }
 
@@ -23,13 +27,8 @@ slr <- function(x, y) {
 mlr <- function(x, y) {
     print("Inside mlr()")
 
-    # get all the categorical columns in X
-    categoricalColumns = sapply(x, is.character)
-
-    # If there are any categorical columns, convert them to dummy variables
-    if (any(categoricalColumns)) {
-        x = model.matrix(~ ., data = x)
-    }
+    # This function call checks if x has categorical columns, converts those columns to dummy variables
+    x = convertCatToNumeric(x)
 
     if(!is.matrix(x)){
         print("Converting x to a matrix")
@@ -57,6 +56,7 @@ mlr <- function(x, y) {
     # %*%: Finally, it multiplies the result from the previous step by y, the vector of response values, to get the coefficients of the linear regression model.
 
     # Return coefficients as a named vector or data frame
+    print("Executed mlr()")
     return(as.data.frame(coefficients))
 }
 
@@ -77,7 +77,8 @@ linearRegression = function(formula, data = NULL){
             x = subset(data, select = -y)
         }
         else{
-            x = data[[x_var]]
+            x = as.data.frame(data[[x_var]])
+            print(head(x))
         }
         y = data[[y_var]]
     }
@@ -90,10 +91,9 @@ linearRegression = function(formula, data = NULL){
         y = data[[y_var]]
     }
     print(paste("x_var: ", x_var))
-    print(paste("y_var: ", y_var))
 
-    # print(paste("dim of x: ", dim(x)))
-    # print(paste("dim of y: ", dim(y)))
+    print(paste("dim of x: ", dim(x)))
+    print(paste("dim of y: ", dim(y)))
 
     if(dim(x)[2] != 1){
         coefficients = mlr(x,y)
