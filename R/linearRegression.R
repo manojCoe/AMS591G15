@@ -63,37 +63,40 @@ mlr <- function(x, y) {
 linearRegression = function(formula, data = NULL){
     print("Inside linearRegression()")
     print(paste("data variable exists: ", !is.null(data)))
-    formula_vars <- all.vars(formula)
-    print(formula_vars)
-
-    # If data variable is not null
-    if(!is.null(data)){
-        y_var = as.character(formula_vars[1])
-        x_var = as.character(formula_vars[2])
-
-        # if x_var == ., then consider all the predictor columns in training data.
-        if(x_var == "."){
-            print("consider all the predictor columns in training data")
-            x = subset(data, select = -y)
-        }
-        else{
-            x = as.data.frame(data[[x_var]])
-            print(head(x))
-        }
-        y = data[[y_var]]
-    }
-    else{
-        df_var = as.character(formula_vars[1])
-        y_var = as.character(formula_vars[2])
-        x_var = as.character(formula_vars[3])
-        data = get(df_var)
-        x = data[[x_var]]
-        y = data[[y_var]]
-    }
-    print(paste("x_var: ", x_var))
+    mm <- model.matrix(formula, data)
+    x <- as.data.frame(mm)  # Exclude intercept column
+    y <- model.response(model.frame(formula, data))
+    # formula_vars <- all.vars(formula)
+    # print(formula_vars)
+    #
+    # # If data variable is not null
+    # if(!is.null(data)){
+    #     y_var = as.character(formula_vars[1])
+    #     x_var = as.character(formula_vars[2])
+    #
+    #     # if x_var == ., then consider all the predictor columns in training data.
+    #     if(x_var == "."){
+    #         print("consider all the predictor columns in training data")
+    #         x = subset(data, select = -y)
+    #     }
+    #     else{
+    #         x = as.data.frame(data[[x_var]])
+    #         print(head(x))
+    #     }
+    #     y = data[[y_var]]
+    # }
+    # else{
+    #     df_var = as.character(formula_vars[1])
+    #     y_var = as.character(formula_vars[2])
+    #     x_var = as.character(formula_vars[3])
+    #     data = get(df_var)
+    #     x = data[[x_var]]
+    #     y = data[[y_var]]
+    # }
+    # print(paste("x_var: ", x_var))
 
     print(paste("dim of x: ", dim(x)))
-    print(paste("dim of y: ", dim(y)))
+    # print(paste("dim of y: ", dim(y)))
 
     if(dim(x)[2] != 1){
         coefficients = mlr(x,y)
