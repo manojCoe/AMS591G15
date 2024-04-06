@@ -1,4 +1,4 @@
-#
+# #
 df = read.csv("C:/Users/coe16/Downloads/Mystery.csv")
 #
 set.seed(123)
@@ -32,7 +32,7 @@ c3
 testSet = subset(testData, select = -y)
 testSet = convertCatToNumeric(testSet)
 
-pred = predict_regression(coefficients = as.matrix(c3), newdata = testSet)
+pred = predict_regression(coefficients = c3, newdata = testSet)
 #
 rmse(pred, testData$y)
 
@@ -46,37 +46,67 @@ rmse(act, testData$y)
 # ===========================================
 # Ridge Regression
 # ===========================================
+
 lambda = 0.1
 x = subset(trainData, select = -y)
 y = subset(trainData, select = y)
 
 model = ridgeRegression(x, y, lambda)
 
-# Print the estimated coefficients
 print(model)
-
-library(MASS)
-# Perform ridge regression using the lm.ridge function
-ridge_result <- lm.ridge(y ~ ., data = trainData, lambda = lambda)
-
-# Extract the coefficients from the lm.ridge result
-ridgeModel <- coef(ridge_result)
-
-print(ridgeModel)
-
-testData$x15 = ifelse(testData$x15 == "y", 1, 0)
-
-pred = predict_regression(model, newdata = subset(testData, select = -y))
-
-testData <- df[-trainID,]
-
-# ref: https://stackoverflow.com/questions/37895372/predictions-of-ridge-regression-in-r
 
 testSet = subset(testData, select = -y)
 testSet = convertCatToNumeric(testSet)
 testSet = as.matrix(testSet)
-act <- testSet %*% ridgeModel
+
+pred = predict_regression(model, testSet)
+#
+library(glmnet)
+x = model.matrix(y ~ ., data = trainData)[, -1]
+y = trainData$y
+
+# Using glmnet function to verify
+
+ridge_ = glmnet(x,y, alpha = 0, lambda = lambda)
+rmodel = coef(ridge_)
+print(rmodel)
+#
+
+act <- testSet %*% rmodel
 
 rmse(pred, testData$y)
 rmse(act, testData$y)
 
+# ===========================================
+# Lasso Regression
+# ===========================================
+
+lambda = 0.1
+x = model.matrix(y ~ ., data = trainData)[, -1]
+y = trainData$y
+
+# model = lassoRegression(x, y, lambda)
+model = lassoRegression(subset(trainData, select = -y), trainData$y, lambda)
+
+testSet = subset(testData, select = -y)
+testSet = convertCatToNumeric(testSet)
+testSet = as.matrix(testSet)
+
+pred = predict_regression(model, testSet)
+
+# Print the estimated coefficients
+print(model)
+
+library(MASS)
+library(glmnet)
+# Using glmnet function to verify
+lasso_ <- glmnet(x,y, alpha = 1, lambda = lambda)
+
+lmodel <- coef(lasso_)
+
+print(lmodel)
+
+act <- testSet %*% lmodel
+
+rmse(pred, testData$y)
+rmse(act, testData$y)
