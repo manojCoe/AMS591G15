@@ -110,3 +110,36 @@ act <- testSet %*% lmodel
 
 rmse(pred, testData$y)
 rmse(act, testData$y)
+
+# ===========================================
+# ElasticNet Regression
+# ===========================================
+lambda1 = 0.1
+lambda2 = 0.2
+model = elasticNet(subset(trainData, select = -y), trainData$y, lambda1, lambda2)
+print(model)
+
+testSet = subset(testData, select = -y)
+testSet = convertCatToNumeric(testSet)
+testSet = as.matrix(testSet)
+
+pred = predict_regression(model, testSet)
+
+# Print the estimated coefficients
+
+library(MASS)
+library(glmnet)
+x = model.matrix(y ~ ., data = trainData)
+y = trainData$y
+
+# Using glmnet function to verify
+elastic_ <- glmnet(x,y, alpha = 0.5, lambda = lambda2)
+
+emodel <- coef(elastic_)
+
+print(emodel)
+
+act <- testSet %*% lmodel
+
+rmse(pred, testData$y)
+rmse(act, testData$y)
