@@ -1,5 +1,5 @@
 convertCatToNumeric = function(x, intercept = TRUE){
-    print("Inside convertCatToNumeric()")
+    # print("Inside convertCatToNumeric()")
     categoricalColumns = sapply(x, is.character)
 
     # If there are any categorical columns, convert them to dummy variables
@@ -13,7 +13,7 @@ convertCatToNumeric = function(x, intercept = TRUE){
             x = modelMatrix
         }
     }
-    print("executed convertCatToNumeric()")
+    # print("executed convertCatToNumeric()")
     return(x)
 }
 
