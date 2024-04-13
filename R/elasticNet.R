@@ -1,11 +1,11 @@
-elasticNet <- function(x, y, lambda1, lambda2, max_iter = 500, tol = 1e-6) {
+elasticNet <- function(x, y, lambda1, lambda2, max_iter = 1000, tol = 1e-6) {
     colNames = colnames(x)
     x = convertCatToNumeric(x)
 
     # TO-DO: Enable scaling for better regularization.
     # x = scale(x, center = TRUE, scale = TRUE)
     # x = cbind(1, x)
-    print(head(x))
+    # print(head(x))
     # Check if x is a data frame and convert it to a matrix if necessary
     if (is.data.frame(x)) {
         x <- as.matrix(x)
