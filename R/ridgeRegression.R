@@ -1,7 +1,15 @@
-ridgeRegression <- function(x, y, lambda) {
+ridgeRegression <- function(x, y, lambda, intercept = TRUE) {
+
+    x = convertCatToNumeric(x, intercept)
+    hasCategorical = x$hasCategorical
+    x = x$data
+
+    if(!hasCategorical & intercept){
+        print("Adding intercept column to matrix.")
+        x = cbind(1, x)
+    }
 
     colNames = colnames(x)
-    x = convertCatToNumeric(x)
 
     # Check if x is a data frame and convert it to a matrix if necessary
     if (is.data.frame(x)) {
@@ -22,6 +30,7 @@ ridgeRegression <- function(x, y, lambda) {
 
     # Convert beta to a data frame with the specified column names
     result <- data.frame(beta)
+    row.names(result) = colNames
 
     return(result)
 }

@@ -1,6 +1,14 @@
-elasticNet <- function(x, y, lambda1, lambda2, max_iter = 1000, tol = 1e-6) {
+elasticNet <- function(x, y, lambda1, lambda2, max_iter = 1000, tol = 1e-6, intercept = TRUE) {
+    x = convertCatToNumeric(x, intercept)
+    hasCategorical = x$hasCategorical
+    x = x$data
+
+    if(!hasCategorical & intercept){
+        print("Adding intercept column to matrix.")
+        x = cbind(1, x)
+    }
+
     colNames = colnames(x)
-    x = convertCatToNumeric(x)
 
     # TO-DO: Enable scaling for better regularization.
     # x = scale(x, center = TRUE, scale = TRUE)
@@ -40,6 +48,6 @@ elasticNet <- function(x, y, lambda1, lambda2, max_iter = 1000, tol = 1e-6) {
         obj_old <- obj
     }
     result = data.frame(beta)
-    row.names(result) = colnames(x)
+    row.names(result) = colNames
     return(result)
 }

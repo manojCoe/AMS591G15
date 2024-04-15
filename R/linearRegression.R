@@ -1,22 +1,35 @@
  # simple linear regression
-slr <- function(x, y) {
+slr <- function(x, y, intercept = TRUE) {
     print("Inside slr()")
 
+    if(length(x) != length(y)){
+        stop("Length of x and y must be equal")
+    }
+
     # This function call checks if x has categorical columns, converts those columns to dummy variables
-    x = convertCatToNumeric(x)
+    # x = convertCatToNumeric(x)
 
     n <- length(x)
 
     x_mean <- mean(x)
     y_mean <- mean(y)
 
-    # For calculating the slope beta1
-    beta1 <- sum((x - x_mean) * (y - y_mean)) / sum((x - x_mean)^2)
+    if(intercept){
+        # For calculating the slope beta1
+        beta1 <- sum((x - x_mean) * (y - y_mean)) / sum((x - x_mean)^2)
 
-    # For calculating intercept b0
-    beta0 <- y_mean - beta1 * x_mean
+        # For calculating intercept b0
+        beta0 <- y_mean - beta1 * x_mean
 
-    coefficients = matrix(c(beta0, beta1), nrow = 1)
+        coefficients = matrix(c(beta0, beta1), nrow = 1)
+        return(c(intercept = coefficients[1], slope = coefficients[2]))
+    }
+    else{
+        beta = sum(x * y) / sum((x)^2)
+        coefficients = matrix(beta)
+        return(c(slope = coefficients))
+    }
+
 
     # Return coefficients
     print("Executed slr()")
@@ -24,11 +37,20 @@ slr <- function(x, y) {
 }
 
 # Multiple Linear regression using normal equation
-mlr <- function(x, y) {
+mlr <- function(x, y, intercept = TRUE) {
     print("Inside mlr()")
 
     # This function call checks if x has categorical columns, converts those columns to dummy variables
-    x = convertCatToNumeric(x)
+    x = convertCatToNumeric(x, intercept)
+    hasCategorical = x$hasCategorical
+    x = x$data
+
+    if(!hasCategorical & intercept){
+        print("Adding intercept column to matrix.")
+        x = cbind(1, x)
+    }
+
+    colNames = colnames(x)
 
     if(!is.matrix(x)){
         print("Converting x to a matrix")
@@ -60,11 +82,11 @@ mlr <- function(x, y) {
     return(as.data.frame(coefficients))
 }
 
-linearRegression = function(formula, data = NULL){
+linearRegression = function(formula, data = NULL, intercept = TRUE){
     print("Inside linearRegression()")
     print(paste("data variable exists: ", !is.null(data)))
     mm <- model.matrix(formula, data)
-    x <- as.data.frame(mm)  # Exclude intercept column
+    x <- as.data.frame(mm[, -1]) # Exclude intercept column
     y <- model.response(model.frame(formula, data))
     # formula_vars <- all.vars(formula)
     # print(formula_vars)
@@ -99,14 +121,14 @@ linearRegression = function(formula, data = NULL){
     # print(paste("dim of y: ", dim(y)))
 
     if(dim(x)[2] != 1){
-        coefficients = mlr(x,y)
+        coefficients = mlr(x,y, intercept)
         return(coefficients)
     }
     else{
         x = as.matrix(x)
         y = as.matrix(y)
-        coefficients = slr(x,y)
-        return(c(intercept = coefficients[1], slope = coefficients[2]))
+        coefficients = slr(x,y, intercept)
+        return(coefficients)
     }
 }
 

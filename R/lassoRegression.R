@@ -1,7 +1,14 @@
 # Define a function for Lasso regression using coordinate descent
 # setting max_iter = 500 for testing, it should default to 1000 in production.
 lassoRegression <- function(x, y, lambda, max_iter = 500, tol = 1e-7, intercept = TRUE) {
-    x = convertCatToNumeric(x)
+    x = convertCatToNumeric(x, intercept)
+    hasCategorical = x$hasCategorical
+    x = x$data
+
+    if(!hasCategorical & intercept){
+        print("Adding intercept column to matrix.")
+        x = cbind(1, x)
+    }
     # print(head(x))
 
     # Check if x is a data frame and convert it to a matrix if necessary

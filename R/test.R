@@ -1,5 +1,7 @@
 # #
-df = read.csv("C:/Users/coe16/Downloads/Mystery.csv")
+# Change the path
+PATH = "C:/Users/coe16/Downloads/Mystery.csv"
+df = read.csv(PATH)
 #
 set.seed(123)
 trainID <- sample(1:nrow(df),round(0.75*nrow(df)))
@@ -13,6 +15,12 @@ testData <- df[-trainID,]
 # ===========================================
 
 # # formula1 = y ~ x1
+
+# For no intercept form
+# coefficients = linearRegression(y~x2, data = trainData, intercept = FALSE)
+# print(coefficients)
+
+# With intercept
 coefficients = linearRegression(y~x2, data = trainData)
 print(coefficients)
 #
@@ -20,17 +28,19 @@ pred = predict_regression(coefficients = as.matrix(coefficients), newdata = as.m
 #
 rmse(pred, testData$y)
 
+# model1 = lm(y ~ 0 + x2, data = trainData) # For no intercept
 model1 = lm(y ~ x2, data = trainData)
 act <- predict(model1, subset(testData, select = x2))
 
 rmse(act, testData$y)
 
 #
+# c3 = linearRegression(y ~ ., trainData, intercept = FALSE) # For no intercept
 c3 = linearRegression(y ~ ., trainData)
 c3
 
-testSet = subset(testData, select = -y)
-testSet = convertCatToNumeric(testSet)
+testSet = preprocessTestData(subset(testData, select = -y), intercept = FALSE)
+# testSet = convertCatToNumeric(testSet)
 
 pred = predict_regression(coefficients = c3, newdata = testSet)
 #
@@ -38,6 +48,7 @@ rmse(pred, testData$y)
 
 testData <- df[-trainID,]
 
+# model2 = lm(y ~ 0 + ., data = trainData) # For no intercept term
 model2 = lm(y ~ ., data = trainData)
 act <- predict(model2, subset(testData, select = -y))
 
@@ -55,9 +66,9 @@ model = ridgeRegression(x, y, lambda)
 
 print(model)
 
-testSet = subset(testData, select = -y)
-testSet = convertCatToNumeric(testSet)
-testSet = as.matrix(testSet)
+testSet = preprocessTestData(subset(testData, select = -y))
+# testSet = convertCatToNumeric(testSet)
+# testSet = as.matrix(testSet)
 
 pred = predict_regression(model, testSet)
 #
@@ -88,9 +99,7 @@ y = trainData$y
 # model = lassoRegression(x, y, lambda)
 model = lassoRegression(subset(trainData, select = -y), trainData$y, lambda)
 
-testSet = subset(testData, select = -y)
-testSet = convertCatToNumeric(testSet)
-testSet = as.matrix(testSet)
+testSet = preprocessTestData(subset(testData, select = -y))
 
 pred = predict_regression(model, testSet)
 
@@ -119,9 +128,7 @@ lambda2 = 0.2
 model = elasticNet(subset(trainData, select = -y), trainData$y, lambda1, lambda2)
 print(model)
 
-testSet = subset(testData, select = -y)
-testSet = convertCatToNumeric(testSet)
-testSet = as.matrix(testSet)
+testSet = preprocessTestData(subset(testData, select = -y))
 
 pred = predict_regression(model, testSet)
 
@@ -129,7 +136,7 @@ pred = predict_regression(model, testSet)
 
 library(MASS)
 library(glmnet)
-x = model.matrix(y ~ ., data = trainData)
+x = model.matrix(y ~ ., data = trainData)[, -1]
 y = trainData$y
 
 # Using glmnet function to verify
