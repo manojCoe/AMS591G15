@@ -24,3 +24,8 @@ rmse = function(observed, predicted) {
 softThreshold <- function(x, lambda) {
     result = sign(x) * max(abs(x) - lambda, 0)
 }
+
+# Sigmoid function
+sigmoid <- function(z) {
+    return(1 / (1 + exp(-z)))
+}
