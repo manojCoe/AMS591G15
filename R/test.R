@@ -143,3 +143,46 @@ act <- testSet %*% lmodel
 
 rmse(pred, testData$y)
 rmse(act, testData$y)
+
+# ===========================================
+# Logistic Regression
+# ===========================================
+library(caret)
+df = read.csv("C:/Users/MSP/Downloads/Unknown.csv", header = T)
+set.seed(123)
+trainID <- sample(1:nrow(df),round(0.75*nrow(df)))
+trainData <- df[trainID,]
+testData <- df[-trainID,]
+
+testSet = subset(testData, select = -y)
+testSet = cbind(1, testSet)
+# testSet = as.matrix(testSet)
+
+x = as.matrix(subset(trainData, select = -y))
+y = as.matrix(trainData$y)
+beta = numeric(13)
+model = logisticRegression(x, y, epochs = 1000)
+model
+preds = as.matrix(testSet) %*% as.matrix(model)
+probabilities_test <- 1 / (1 + exp(-preds))
+head(probabilities_test)
+predictions_test <- ifelse(probabilities_test > 0.5, 1, 0)
+
+table(predictions_test, testData$y)
+y_act = as.matrix(testData$y)
+
+confusionMatrix(data = factor(predictions_test, levels = c(0, 1)),
+                reference = factor(y_act, levels = c(0, 1)))
+
+x = model.matrix(y ~ ., data = trainData)
+y = trainData$y
+
+logModel <- glm(y ~ ., data = trainData, family = binomial)
+logModel$coefficients
+
+preds = predict(logModel, subset(testData, select = -y), type = "response")
+act = ifelse(preds<0.5, 0, 1)
+# table(act, testData$y)
+
+confusionMatrix(data = factor(act, levels = c(0, 1)),
+                reference = factor(y_act, levels = c(0, 1)))
