@@ -1,6 +1,6 @@
 # #
 # Change the path
-PATH = "C:/Users/coe16/Downloads/Mystery.csv"
+PATH = "C:/Users/MSP/Downloads/Mystery.csv"
 df = read.csv(PATH)
 #
 set.seed(123)
@@ -97,7 +97,8 @@ x = model.matrix(y ~ ., data = trainData)[, -1]
 y = trainData$y
 
 # model = lassoRegression(x, y, lambda)
-model = lassoRegression(subset(trainData, select = -y), trainData$y, lambda)
+# model = lassoRegression(subset(trainData, select = -y), trainData$y, lambda)
+model = lassoRegression(x, y, lambda)
 
 testSet = preprocessTestData(subset(testData, select = -y))
 
@@ -150,3 +151,37 @@ act <- testSet %*% lmodel
 
 rmse(pred, testData$y)
 rmse(act, testData$y)
+
+# ===========================================
+# SVM
+# ===========================================
+
+PATH = "C:/Users/MSP/Downloads/Enigma.csv"
+df = read.csv(PATH)
+#
+set.seed(123)
+trainID <- sample(1:nrow(df),round(0.75*nrow(df)))
+trainData <- df[trainID,]
+testData <- df[-trainID,]
+
+head(df)
+# str(df)
+lambda = 0.01
+x = model.matrix(y ~ ., data = trainData)[, -1]
+y = trainData$y
+
+testSet = preprocessTestData(subset(testData, select = -y), intercept = FALSE)
+test_x = as.matrix(testSet)
+
+model = svm_classification_glmnet(x, y, FALSE, FALSE, 1, lambda)
+# Predict on the test set
+predictions <- predict(model, newx = test_x, s = lambda, type = "response")
+# predictions <- predict(model, newx = test_x, s = "lambda.min", type = "response")
+preds = ifelse(predictions > 0.5, 1, 0)
+# predictions =  factor(predictions, levels = 1:2, labels = c(0, 1))
+head(predictions)
+# Compute accuracy
+library(caret)
+head(preds)
+
+confusionMatrix(as.factor(preds), as.factor(testData$y))
