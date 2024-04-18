@@ -1,4 +1,6 @@
 elasticNet <- function(x, y, lambda1, lambda2, max_iter = 1000, tol = 1e-6, intercept = TRUE) {
+    x = x[complete.cases(x), ]
+    y = y[complete.cases(y), ]
     x = convertCatToNumeric(x, intercept)
     hasCategorical = x$hasCategorical
     x = x$data

@@ -1,5 +1,6 @@
 ridgeRegression <- function(x, y, lambda, intercept = TRUE) {
-
+    x = x[complete.cases(x), ]
+    y = y[complete.cases(y), ]
     x = convertCatToNumeric(x, intercept)
     hasCategorical = x$hasCategorical
     x = x$data

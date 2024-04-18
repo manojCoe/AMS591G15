@@ -1,5 +1,5 @@
  # simple linear regression
-slr <- function(x, y, intercept = TRUE) {
+slr = function(x, y, intercept = TRUE) {
     print("Inside slr()")
 
     if(length(x) != length(y)){
@@ -9,17 +9,17 @@ slr <- function(x, y, intercept = TRUE) {
     # This function call checks if x has categorical columns, converts those columns to dummy variables
     # x = convertCatToNumeric(x)
 
-    n <- length(x)
+    n = length(x)
 
-    x_mean <- mean(x)
-    y_mean <- mean(y)
+    x_mean = mean(x)
+    y_mean = mean(y)
 
     if(intercept){
         # For calculating the slope beta1
-        beta1 <- sum((x - x_mean) * (y - y_mean)) / sum((x - x_mean)^2)
+        beta1 = sum((x - x_mean) * (y - y_mean)) / sum((x - x_mean)^2)
 
         # For calculating intercept b0
-        beta0 <- y_mean - beta1 * x_mean
+        beta0 = y_mean - beta1 * x_mean
 
         coefficients = matrix(c(beta0, beta1), nrow = 1)
         return(c(intercept = coefficients[1], slope = coefficients[2]))
@@ -37,7 +37,7 @@ slr <- function(x, y, intercept = TRUE) {
 }
 
 # Multiple Linear regression using normal equation
-mlr <- function(x, y, intercept = TRUE) {
+mlr = function(x, y, intercept = TRUE) {
     print("Inside mlr()")
 
     # This function call checks if x has categorical columns, converts those columns to dummy variables
@@ -65,7 +65,7 @@ mlr <- function(x, y, intercept = TRUE) {
     }
 
     # Compute coefficients using the normal equation
-    coefficients <- solve(t(x) %*% x) %*% t(x) %*% y
+    coefficients = solve(t(x) %*% x) %*% t(x) %*% y
 
     # t(x): Transposes the model matrix x. This is done because in the normal equation, we need to multiply x by its transpose.
     #
@@ -85,10 +85,14 @@ mlr <- function(x, y, intercept = TRUE) {
 linearRegression = function(formula, data = NULL, intercept = TRUE){
     print("Inside linearRegression()")
     print(paste("data variable exists: ", !is.null(data)))
-    mm <- model.matrix(formula, data)
-    x <- as.data.frame(mm[, -1]) # Exclude intercept column
-    y <- model.response(model.frame(formula, data))
-    # formula_vars <- all.vars(formula)
+    mm = model.matrix(formula, data)
+    x = as.data.frame(mm[, -1]) # Exclude intercept column
+    # remove null values
+    x = x[complete.cases(x), ]
+    y = y[complete.cases(y), ]
+    y = model.response(model.frame(formula, data))
+    # y = na.omit(y)
+    # formula_vars = all.vars(formula)
     # print(formula_vars)
     #
     # # If data variable is not null

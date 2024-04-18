@@ -23,7 +23,7 @@ rmse = function(observed, predicted) {
     sqrt(mean((observed - predicted)^2))
 }
 
-softThreshold <- function(x, lambda) {
+softThreshold = function(x, lambda) {
     result = sign(x) * max(abs(x) - lambda, 0)
 }
 

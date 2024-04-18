@@ -1,6 +1,8 @@
 # Define a function for Lasso regression using coordinate descent
 # setting max_iter = 500 for testing, it should default to 1000 in production.
 lassoRegression <- function(x, y, lambda, max_iter = 500, tol = 1e-7, intercept = TRUE) {
+    x = x[complete.cases(x), ]
+    y = y[complete.cases(y), ]
     x = convertCatToNumeric(x, intercept)
     hasCategorical = x$hasCategorical
     x = x$data
