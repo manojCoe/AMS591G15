@@ -207,7 +207,7 @@ y = trainData$y
 testSet = preprocessTestData(subset(testData, select = -y), intercept = FALSE)
 test_x = as.matrix(testSet)
 
-model = svm_classification(x, y, FALSE, kernel = "radial", cost = 1)
+model = svmModel(x, y, FALSE, kernel = "radial", cost = 1)
 # Predict on the test set
 predictions <- predict(model, test_x, type = "class")
 # predictions <- predict(model, newx = test_x, s = "lambda.min", type = "response")
