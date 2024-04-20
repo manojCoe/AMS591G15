@@ -150,3 +150,42 @@ act <- testSet %*% lmodel
 
 rmse(pred, testData$y)
 rmse(act, testData$y)
+
+# ===========================================
+# K Most Important Predictors
+# ===========================================
+
+set.seed(123)
+n <- 100
+x1 <- rnorm(n)
+x2 <- rnorm(n)
+x3 <- x1 + x2 + rnorm(n, sd = 0.2)
+x4 <- rnorm(n)
+x = cbind(x1, x2, x3, x4)
+y <- x1 - x2 - x3 + x4 + rnorm(n)
+
+res = importantPredictors(x, y, 2)
+res
+
+PATH = "C:/Users/MSP/Downloads/math.csv"
+df = read.csv(PATH)
+sum(is.na(df))
+
+head(df)
+str(df)
+unique(df$x13)
+
+set.seed(123)
+trainID <- sample(1:nrow(df),round(0.75*nrow(df)))
+trainData <- df[trainID,]
+testData <- df[-trainID,]
+
+x = as.matrix(subset(trainData, select = -y))
+y = as.matrix(trainData$y)
+
+x_test = as.matrix(subset(testData, select = -y))
+y_test = as.matrix(testData$y)
+
+
+
+importantPredictors(x, y, )
