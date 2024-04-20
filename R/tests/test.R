@@ -150,3 +150,48 @@ act <- testSet %*% lmodel
 
 rmse(pred, testData$y)
 rmse(act, testData$y)
+
+# ===========================================
+# vif
+# ===========================================
+
+set.seed(123)
+n <- 100
+x1 <- rnorm(n)
+x2 <- rnorm(n)
+x3 <- x1 + x2 + rnorm(n, sd = 0.2)
+x4 <- rnorm(n)
+x = cbind(x1, x2, x3, x4)
+y <- x1 - x2 - x3 + x4 + rnorm(n)
+
+data = data.frame(y, x)
+
+model = lm(y ~ x1 + x2 + x3 + x4)
+
+# model1 = lm(y ~ x)
+model1 = lm(y ~ ., data = data)
+
+res = custom_vif2(model1)
+res
+
+PATH = "C:/Users/coe16/Downloads/math.csv"
+df = read.csv(PATH, sep = ";")
+df = subset(df, select = -c(G1, G2))
+df = preprocessTestData(df, intercept = FALSE)
+sum(is.na(df))
+
+head(df)
+str(df)
+
+set.seed(123)
+trainID <- sample(1:nrow(df),round(0.75*nrow(df)))
+trainData <- data.frame(df[trainID,])
+testData <- data.frame(df[-trainID,])
+
+x = as.matrix(subset(trainData, select = -G3))
+y = as.matrix(trainData$G3)
+
+x_test = as.matrix(subset(testData, select = -G3))
+y_test = as.matrix(testData$G3)
+
+model = lm()
