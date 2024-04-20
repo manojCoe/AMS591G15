@@ -1,83 +1,54 @@
-library(glmnet)
+library(e1071)
 
-svm_classification_glmnet <- function(x, y, cv = FALSE, useRegularization = FALSE, alpha, lambda, lambdaList = list()) {
+svmModel <- function(x, y, cv = FALSE, kernel = "radial", cost = 1, gamma = NULL, cross = 5, epsilon = 0.1) {
+    if (cv && is.null(gamma)) {
+        stop("gamma parameter must be provided for cross-validation")
+    }
     if(class(cv) != "logical"){
         stop("cv (Cross Validation) parameter accepts only 'logical' type values ")
     }
-    if(class(useRegularization) != "logical"){
-        stop("useRegularization parameter accepts only 'logical' type values ")
+    if( !(kernel %in% c("linear", "radial", "polynomial", "sigmoid")) ){
+        stop("Please provide a valid kernel type: ('linear', 'radial', 'polynomial', 'sigmoid')")
     }
-    if(class(lambda) != "numeric"){
-        stop("lambda parameter accepts only 'numeric' type values ")
+    if(class(epsilon) != "numeric"){
+        stop("epsilon parameter accepts only 'numeric' type values ")
     }
-    if(class(alpha) != "numeric"){
-        stop("alpha parameter accepts only 'numeric' type values ")
+    if(class(cost) != "numeric"){
+        stop("cost parameter accepts only 'numeric' type values ")
     }
-    if(class(lambdaList) != "list"){
-        stop("lambdaList parameter accepts only 'list' type values ")
-    }
-    x = convertCatToNumeric(x, intercept = FALSE)
+
+    x = convertCatToNumeric(data.frame(x), intercept = FALSE)
     x = x$data
 
-    # Convert target to factor for multinomial classification
-    if (length(unique(y)) > 2) {
-        y <- as.factor(y)
-        # y_test <- as.factor(y_test)
-    }
-    if(cv){
-        if(is.null(alpha)){
-            alpha = 1
-            warning("Please provide alpha. Setting alpha to 1 for model fitting")
-        }
-        if(length(lambdaList) == 0){
-            if (length(unique(y)) == 2) {
-                # Binary classification
-                fit <- cv.glmnet(x, y, family = "binomial", alpha = alpha)
-            } else {
-                # Multiclass classification
-                fit <- cv.glmnet(x, y, family = "multinomial", alpha = alpha)
-            }
-        }
-        else if(length(lambdaList) > 0){
-            if (length(unique(y)) == 2) {
-                # Binary classification
-                fit <- cv.glmnet(x, y, family = "binomial", alpha = alpha, lambda = lambda)
-            } else {
-                # Multiclass classification
-                fit <- cv.glmnet(x, y, family = "multinomial", alpha = alpha, lambda = lambda)
-            }
-        }
-    }
-    else{
-        if(is.null(lambda)){
-            lambda = 0.01
-            warning("Please provide lambda. Setting lambda to default value 0.01")
-        }
-        if(useRegularization){
+    # Convert target to factor for classification
+    y <- as.factor(y)
 
-            if(is.null(alpha)){
-                alpha = 1
-                warning("Please provide alpha. Setting alpha to 1 for model fitting")
-            }
+    if (cv) {
+        tune.control <- tune.control(sampling = "cross", cross = cross)
 
-            if (length(unique(y)) == 2) {
-                # Binary classification
-                fit <- glmnet(x, y, family = "binomial", alpha = alpha, lambda = lambda)
+        if (kernel == "linear") {
+            fit <- tune(svm, y ~ ., data = x, kernel = "linear", cost = cost, tunecontrol = tune.control)
+        } else if (kernel == "radial") {
+            if (is.null(gamma)) {
+                fit <- tune(svm, y ~ ., data = x, kernel = "radial", cost = cost, tunecontrol = tune.control)
             } else {
-                # Multiclass classification
-                fit <- glmnet(x, y, family = "multinomial", alpha = alpha, lambda = lambda)
+                fit <- tune(svm, y ~ ., data = x, kernel = "radial", cost = cost, gamma = gamma, tunecontrol = tune.control)
             }
+        } else {
+            stop("Unsupported kernel type")
         }
-        else{
-            if (length(unique(y)) == 2) {
-                # Binary classification
-                fit <- glmnet(x, y, family = "binomial", lambda = lambda)
+    } else {
+        if (kernel == "linear") {
+            fit <- svm(y ~ ., data = x, kernel = "linear", cost = cost)
+        } else if (kernel == "radial") {
+            if (is.null(gamma)) {
+                fit <- svm(y ~ ., data = x, kernel = "radial", cost = cost)
             } else {
-                # Multiclass classification
-                fit <- glmnet(x, y, family = "multinomial", lambda = lambda)
+                fit <- svm(y ~ ., data = x, kernel = "radial", cost = cost, gamma = gamma)
             }
+        } else {
+            stop("Unsupported kernel type")
         }
-
     }
 
     return(fit)
