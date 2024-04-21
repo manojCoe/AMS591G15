@@ -1,6 +1,6 @@
 library(glmnet)
 
-logisticRegression <- function(x, y, cv = FALSE, useRegularization = FALSE, alpha, lambda = NULL, lambdaList = list()) {
+logisticRegression <- function(x, y, cv = FALSE, useRegularization = FALSE, alpha=1, lambda = NULL, lambdaList = list()) {
     if(class(cv) != "logical"){
         stop("cv (Cross Validation) parameter accepts only 'logical' type values ")
     }

@@ -1,6 +1,6 @@
 # #
 # Change the path
-PATH = "C:/Users/MSP/Downloads/Mystery.csv"
+PATH = "C:/Users/praanand/Desktop/Statistical Comuting/Mystery.csv"
 df = read.csv(PATH)
 #
 set.seed(123)
@@ -219,3 +219,14 @@ library(caret)
 head(preds)
 
 confusionMatrix(as.factor(predictions), as.factor(testData$y))
+
+# ===========================================
+# bagging
+# ===========================================
+data("iris")
+head(iris)
+
+x = subset(iris, select = -Species)
+y = as.matrix(iris$Species)
+
+res = bagging(x, y, y~x, "logistic", 50)
