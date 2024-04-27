@@ -1,11 +1,11 @@
 convertCatToNumeric = function(x, intercept = TRUE){
-    print("Inside convertCatToNumeric()")
+    # print("Inside convertCatToNumeric()")
     categoricalColumns = sapply(x, is.character)
     hasCategorical = FALSE
 
     # If there are any categorical columns, convert them to dummy variables
     if (any(categoricalColumns)) {
-        print("X contains categorical data.")
+        # print("X contains categorical data.")
         hasCategorical = TRUE
         modelMatrix = model.matrix(~ ., data = x)
         if(intercept == FALSE){
@@ -15,7 +15,7 @@ convertCatToNumeric = function(x, intercept = TRUE){
             x = modelMatrix
         }
     }
-    print("executed convertCatToNumeric()")
+    # print("executed convertCatToNumeric()")
     return(list(data = x, hasCategorical = hasCategorical))
 }
 

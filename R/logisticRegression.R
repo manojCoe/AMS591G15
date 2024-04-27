@@ -24,6 +24,9 @@ logisticRegression <- function(x, y, cv = FALSE, useRegularization = FALSE, alph
         y <- as.factor(y)
         # y_test <- as.factor(y_test)
     }
+    # if(!is.matrix(y)){
+    #     y = as.matrix(y)
+    # }
     if(cv){
         if(is.null(alpha)){
             alpha = 1

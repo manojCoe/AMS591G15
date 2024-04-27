@@ -226,7 +226,11 @@ confusionMatrix(as.factor(predictions), as.factor(testData$y))
 data("iris")
 head(iris)
 
-x = subset(iris, select = -Species)
-y = as.matrix(iris$Species)
+# x = subset(iris, select = -Species)
+# y = as.matrix(iris$Species)
 
-res = bagging(x, y, y~x, "logistic", 50)
+x = model.matrix(Species ~ ., data = iris)[, -1]
+y = iris$Species
+data = data.frame(x, y)
+y = as.matrix(y)
+res = bagging(x, y, y~x, "logistic", 50, "class", lambda = 0.01, bagging_type = "majority_vote")
