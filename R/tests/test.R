@@ -223,14 +223,43 @@ confusionMatrix(as.factor(predictions), as.factor(testData$y))
 # ===========================================
 # bagging
 # ===========================================
-data("iris")
-head(iris)
+#data = read.csv("C:/Users/praanand/Downloads/math.csv", sep = ";")
+#data = subset(data, select = - c(G1,G2))
 
-# x = subset(iris, select = -Species)
-# y = as.matrix(iris$Species)
+#x = subset(iris, select = -Species)
+#y = as.matrix(iris$Species)
+#x = model.matrix(Species ~ ., data = iris)[, -1]
+#y = iris$Species
+# data = data.frame(x, y)
+#y = as.matrix(y)
+#res = bagging(x, y, y~x, "logistic", 50, "class", lambda = 0.01, bagging_type = "majority_vote")
 
-x = model.matrix(Species ~ ., data = iris)[, -1]
-y = iris$Species
-data = data.frame(x, y)
-y = as.matrix(y)
-res = bagging(x, y, y~x, "logistic", 50, "class", lambda = 0.01, bagging_type = "majority_vote")
+
+
+library("MASS")
+
+x <- as.data.frame(Boston[, -14])
+y <- Boston[, 14]
+#x = as.matrix(data[, -ncol(data)])
+#y = as.matrix(data$G3)
+
+data = data.frame(x,y)
+
+formula = y ~ .
+res = bagging(x, y, formula = formula, model_type = "elastic_net", 50)
+res
+
+
+n = nrow(data)
+p = ncol(data) - 1
+sample_indices <- sample(1:n, replace = TRUE)
+bootstrap_data <- data[sample_indices, ]
+
+x <- as.matrix(bootstrap_data[, -ncol(bootstrap_data)])
+y <- bootstrap_data[, ncol(bootstrap_data)]
+
+model = cv.glmnet(as.matrix(x), as.matrix(y), alpha = 0)
+preds = predict_regression(coef(model, s = model$lambda.min), data[, -length(data)])
+coefficients = coef(model, s = model$lambda.min)
+which(coefficients != 0)
+res
