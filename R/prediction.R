@@ -15,11 +15,11 @@ predict_regression <- function(coefficients, newdata) {
         newdata <- as.matrix(newdata)
     }
 
-    print(paste("class of coefficients: ", class(coefficients)))
-    print(paste("class of newdata: ", class(newdata)))
-
-    print(paste("dim of coef: ", dim(coefficients)))
-    print(paste("dim of y: ", dim(newdata)))
+    # print(paste("class of coefficients: ", class(coefficients)))
+    # print(paste("class of newdata: ", class(newdata)))
+    #
+    # print(paste("dim of coef: ", dim(coefficients)))
+    # print(paste("dim of y: ", dim(newdata)))
     # Make predictions
     predictions <- newdata %*% coefficients
 
