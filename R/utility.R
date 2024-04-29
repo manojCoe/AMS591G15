@@ -15,6 +15,9 @@ convertCatToNumeric = function(x, intercept = TRUE){
             x = modelMatrix
         }
     }
+    if(is.data.frame(x)){
+        x = as.matrix(x)
+    }
     # print("executed convertCatToNumeric()")
     return(list(data = x, hasCategorical = hasCategorical))
 }
@@ -27,8 +30,22 @@ softThreshold = function(x, lambda) {
     result = sign(x) * max(abs(x) - lambda, 0)
 }
 
-preprocessTestData = function(testSet, intercept = TRUE){
-    x = convertCatToNumeric(testSet, intercept)
+preprocessTestData = function(testSet, intercept = TRUE, features = NULL){
+    if(!is.null(features)){
+        if(class(features) != "character"){
+            stop("parameter 'features' must be of type character vector")
+        }
+        if(length(features) == 0){
+            stop("length of 'features' is 0, expected > 0")
+        }
+        else{
+            x = convertCatToNumeric(testSet[, features], intercept)
+        }
+    }
+    else{
+        x = convertCatToNumeric(testSet, intercept)
+    }
+
     hasCategorical = x$hasCategorical
     x = x$data
 
@@ -38,4 +55,10 @@ preprocessTestData = function(testSet, intercept = TRUE){
     }
     x = as.matrix(x)
     return(x)
+}
+
+getInformativePredictors = function(model){
+    coefficients = as.matrix(coef(model))[-1, ]
+    selectedPredictors = names(which(coefficients != 0))
+    return(selectedPredictors)
 }

@@ -1,7 +1,8 @@
 # #
 # Change the path
-PATH = "C:/Users/praanand/Desktop/Statistical Comuting/Mystery.csv"
+PATH = "C:/Users/MSP/Downloads/Mystery.csv"
 df = read.csv(PATH)
+df = na.omit(df)
 #
 set.seed(123)
 trainID <- sample(1:nrow(df),round(0.75*nrow(df)))
@@ -92,31 +93,86 @@ rmse(act, testData$y)
 # Lasso Regression
 # ===========================================
 
-lambda = 0.1
-x = model.matrix(y ~ ., data = trainData)[, -1]
+PATH = "C:/Users/MSP/Downloads/Mystery.csv"
+df = read.csv(PATH)
+df = na.omit(df)
+#
+set.seed(123)
+trainID <- sample(1:nrow(df),round(0.75*nrow(df)))
+trainData <- df[trainID,]
+testData <- df[-trainID,]
+
+# x = subset(trainData, select = -y)
+x = convertCatToNumeric(subset(trainData, select = -y), intercept = FALSE)$data
+y = as.matrix(trainData$y)
+
+# cv.fit <- crossValidation(x, y, alpha = 1, nfolds = 5)
+# cvModel = glmnet(x[, cv.fit$features], y, alpha = 1, lambda = cv.fit$bestLambda)
+
+# model = lasso_regression(x, trainData$y)
+model = lasso_regression(x, trainData$y, importance = TRUE)
+model
+
+#
+testSet = preprocessTestData(subset(testData, select = -y), intercept = TRUE, features = model$features)
+
+
+
+pred = predict_regression(model$coef, testSet)
+rmse(pred, testData$y)
+
+library(caret)
+PATH = "C:/Users/MSP/Downloads/Enigma.csv"
+df = read.csv(PATH)
+
+df = na.omit(df)
+#
+set.seed(123)
+trainID <- sample(1:nrow(df),round(0.75*nrow(df)))
+trainData <- df[trainID,]
+testData <- df[-trainID,]
+
+head(trainData)
+
+x = as.matrix(subset(trainData, select = -y))
 y = trainData$y
 
+model = lasso_regression(x, y, importance = FALSE, type = "class")
+testSet = preprocessTestData(subset(testData, select = -y), intercept = FALSE)
+
+predictions = predict(model$fit, testSet, type = "class")
+preds = ifelse(predictions > 0.5, 1, 0)
+head(preds)
+
+confusionMatrix(as.factor(preds), as.factor(testData$y))
+
+# lambda = 0.1
+# x = model.matrix(y ~ ., data = trainData)[, -1]
+# y = trainData$y
+#
+# # model = lassoRegression(x, y, lambda)
+# # model = lassoRegression(subset(trainData, select = -y), trainData$y, lambda)
 # model = lassoRegression(x, y, lambda)
-# model = lassoRegression(subset(trainData, select = -y), trainData$y, lambda)
-model = lassoRegression(x, y, lambda)
-
-testSet = preprocessTestData(subset(testData, select = -y))
-
-pred = predict_regression(model, testSet)
-
-# Print the estimated coefficients
-print(model)
-
+#
+# testSet = preprocessTestData(subset(testData, select = -y))
+#
+# pred = predict_regression(model, testSet)
+#
+# # Print the estimated coefficients
+# print(model)
+#
 library(MASS)
 library(glmnet)
 # Using glmnet function to verify
-lasso_ <- glmnet(x,y, alpha = 1, lambda = lambda)
+lasso_ <- glmnet(x,y, alpha = 1, lambda = 0.01)
 
 lmodel <- coef(lasso_)
 
 print(lmodel)
 
-act <- testSet %*% lmodel
+testSet = preprocessTestData(subset(testData, select = -y), intercept = FALSE)
+
+act <- predict_regression(lmodel, testSet)
 
 rmse(pred, testData$y)
 rmse(act, testData$y)
@@ -126,13 +182,79 @@ rmse(act, testData$y)
 # ===========================================
 lambda1 = 0.1
 lambda2 = 0.2
-model = elasticNet(subset(trainData, select = -y), trainData$y, lambda1, lambda2)
-print(model)
 
-testSet = preprocessTestData(subset(testData, select = -y))
+x = convertCatToNumeric(subset(trainData, select = -y), intercept = FALSE)$data
+y = as.matrix(trainData$y)
 
-pred = predict_regression(model, testSet)
+actModel = cv.glmnet(x, y, relax = FALSE, alpha = 0.5)
+getInformativePredictors(actModel)
+coef(actModel)
+lambda = actModel$lambda.min
 
+PATH = "C:/Users/MSP/Downloads/Mystery.csv"
+df = read.csv(PATH)
+df = na.omit(df)
+#
+set.seed(123)
+trainID <- sample(1:nrow(df),round(0.75*nrow(df)))
+trainData <- df[trainID,]
+testData <- df[-trainID,]
+
+# x = subset(trainData, select = -y)
+x = convertCatToNumeric(subset(trainData, select = -y), intercept = FALSE)$data
+y = as.matrix(trainData$y)
+
+cv.fit <- crossValidation(x, y, alpha = 1, nfolds = 5)
+cvModel = glmnet(x[, cv.fit$features], y, alpha = 0.5, lambda = cv.fit$bestLambda)
+
+model = elastic_net_regression(x, trainData$y)
+# model = elastic_net_regression(x, trainData$y, importance = TRUE)
+model
+
+
+coefficients_all <- as.matrix(coef(model))
+
+# Sum the coefficients across all classes
+coefficients_sum <- Reduce(`+`, coefficients_all)
+coefficients_matrix <- as.matrix(coefficients_sum)[-1, , drop=FALSE]
+
+# Extract the absolute values of coefficients
+coefficients_matrix_without_intercept <- coefficients_matrix[-1, , drop = FALSE]
+
+selected_vars <- which(coefficients_matrix_without_intercept != 0)
+
+# model = elasticNet(subset(trainData, select = -y), trainData$y, lambda1, lambda2)
+# print(model)
+#
+testSet = preprocessTestData(subset(testData, select = -y), intercept = TRUE)
+
+pred = predict_regression(coef(model), testSet)
+rmse(pred, testData$y)
+
+library(caret)
+PATH = "C:/Users/MSP/Downloads/Enigma.csv"
+df = read.csv(PATH)
+
+df = na.omit(df)
+#
+set.seed(123)
+trainID <- sample(1:nrow(df),round(0.75*nrow(df)))
+trainData <- df[trainID,]
+testData <- df[-trainID,]
+
+head(trainData)
+
+x = as.matrix(subset(trainData, select = -y))
+y = trainData$y
+
+model = elastic_net_regression(x, y, cv = TRUE, type = "class")
+testSet = preprocessTestData(subset(testData, select = -y), intercept = FALSE)
+
+predictions = predict(model, testSet, type = "class")
+preds = ifelse(predictions > 0.5, 1, 0)
+head(preds)
+
+confusionMatrix(as.factor(preds), as.factor(testData$y))
 # Print the estimated coefficients
 
 library(MASS)
@@ -141,7 +263,7 @@ x = model.matrix(y ~ ., data = trainData)[, -1]
 y = trainData$y
 
 # Using glmnet function to verify
-elastic_ <- glmnet(x,y, alpha = 0.5, lambda = lambda2)
+elastic_ <- glmnet(x,y, alpha = 0.5, lambda = 0.2)
 
 emodel <- coef(elastic_)
 
@@ -234,3 +356,25 @@ y = iris$Species
 data = data.frame(x, y)
 y = as.matrix(y)
 res = bagging(x, y, y~x, "logistic", 50, "class", lambda = 0.01, bagging_type = "majority_vote")
+
+
+# ===========================================
+# cross validation
+# ===========================================
+PATH = "C:/Users/MSP/Downloads/Mystery.csv"
+# PATH = "C:/Users/MSP/Downloads/Enigma.csv"
+df = read.csv(PATH)
+
+df = na.omit(df)
+#
+set.seed(123)
+trainID <- sample(1:nrow(df),round(0.75*nrow(df)))
+trainData <- df[trainID,]
+testData <- df[-trainID,]
+
+head(trainData)
+
+x = subset(trainData, select = -y)
+y = trainData$y
+cv.fit = crossValidation(subset(trainData, select = -y), y)
+# cv.fit = crossValidation(subset(trainData, select = -y), y, type = "class")
