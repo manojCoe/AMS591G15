@@ -412,3 +412,76 @@ preds = predict_regression(coef(model, s = model$lambda.min), data[, -length(dat
 coefficients = coef(model, s = model$lambda.min)
 which(coefficients != 0)
 res
+
+
+
+library(glmnet)
+library(caret)
+PATH <- data(iris)
+str(iris)
+
+x <- iris[, -5]
+y <- iris$Species
+
+lasso_result <- lasso_regression(x, y, type = "class", importance = TRUE)
+lasso_result
+
+preds = predict(lasso_result$fit, as.matrix(x), type = "class")
+confusionMatrix(as.factor(y), as.factor(preds))
+
+elastic_result <- elastic_net_regression(x,y,type = 'class', importance = TRUE)
+elastic_result
+
+preds = predict(elastic_result$fit, as.matrix(x), type = "class")
+confusionMatrix(as.factor(y), as.factor(preds))
+
+library(glmnet)
+
+
+data(iris)
+x <- iris[, -5]
+y <- as.factor(iris$Species)
+set.seed(123)
+trainID <- sample(1:nrow(x), round(0.75 * nrow(iris)))
+trainData <- x[trainID, ]
+testData <- x[-trainID, ]
+
+set.seed(123)
+cv <- trainControl(method = "cv", number = 5)
+lasso_model <- glmnet(as.matrix(trainData), as.matrix(y[trainID]), alpha = 1, family = "multinomial", lambda = 0.01)
+testDataMatrix <- as.matrix(testData)
+predictions <- predict(lasso_model, testDataMatrix, type = "class")
+
+# levels(predictions) <- levels(y[-trainID])
+confusionMatrix(as.factor(predictions), as.factor(y[-trainID]))
+##########################################
+data(iris)
+x <- iris[, -5]  # Features
+y <- as.factor(iris$Species)  # Target variable
+
+set.seed(123)
+trainID <- sample(1:nrow(iris), round(0.75 * nrow(iris)))
+trainData <- iris[trainID, ]
+testData <- iris[-trainID, ]
+
+x <- convertCatToNumeric(subset(trainData, select = -Species), intercept = FALSE)$data
+y <- as.matrix(trainData[, "Species", drop = FALSE])
+
+
+# Train the Lasso regression model
+model <- lasso_regression(x, y, importance = T)
+
+# Display the model summary
+print(model)
+
+# Preprocess the test data using the model features
+testSet <- preprocessTestData(subset(testData, select = -Species), intercept = TRUE, features = model$features)
+
+# Make predictions on the test set
+pred <- predict_regression(model$coef, testSet)
+
+# Calculate RMSE
+rmse_value <- rmse(pred, as.matrix(testData[, "Species", drop = FALSE]))
+print(rmse_value)
+
+

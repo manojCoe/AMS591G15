@@ -30,14 +30,23 @@ crossValidation = function(x, y, alpha = 1, lambda = NULL, nfolds = 10, type = "
     else{
         fit <- cv.glmnet(x, y, alpha = alpha, nfolds = nfolds)
     }
-    # Get the index of the lambda value with the minimum mean cross-validated error
-    best_lambda_index <- which.min(fit$cvm)
 
     # Retrieve the best lambda value
-    best_lambda <- fit$lambda[best_lambda_index]
+    best_lambda <- fit$lambda.min
     print(paste("best lambda: ", best_lambda))
+    print("")
+    if((type != "class") || (type == "class" && length(unique(y))<=2)){
+        selectedFeatures = getInformativePredictors(fit)
+    }
+    else{
+        coefficients = as.matrix(coef(fit, s = "lambda.min"))
+        coefficients_sum <- Reduce(`+`, coefficients)
+        coefficients_matrix <- as.matrix(coefficients_sum)[-1, , drop=FALSE]
+        selected_vars <- which(coefficients_matrix != 0)
+        # selected_indices <- order(coefficients_matrix, decreasing = TRUE)
+        selectedFeatures <- names(coefficients_matrix[selected_vars, ])
 
-    selectedFeatures = getInformativePredictors(fit)
+    }
     cat("Most Informative Predictors: \n", selectedFeatures)
     return(list(fit = fit, bestLambda = best_lambda, features = selectedFeatures, alpha = alpha, nfolds = nfolds, type = type))
 }

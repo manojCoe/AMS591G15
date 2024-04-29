@@ -21,9 +21,11 @@ lasso_regression <- function(x, y, alpha = 1, lambda = NULL, importance = FALSE,
     if(importance){
         cv.fit = crossValidation(x, y, alpha = alpha, type = type, nfolds = nfolds)
         print(cv.fit)
-        fit = glmnet(x[, cv.fit$features], y, alpha = alpha, lambda = cv.fit$bestLambda)
-        result = list(fit = fit, coef = coef(fit), features = cv.fit$features)
-        return(result)
+        x = x[, cv.fit$features]
+        lambda = cv.fit$bestLambda
+        # fit = glmnet(x[, cv.fit$features], y, alpha = alpha, lambda = cv.fit$bestLambda)
+        # result = list(fit = fit, coef = coef(fit), features = cv.fit$features)
+        # return(result)
     }
 
     if (is.null(lambda)) {
@@ -45,3 +47,4 @@ lasso_regression <- function(x, y, alpha = 1, lambda = NULL, importance = FALSE,
     result = list(fit = fit, coef = coef(fit))
     return(result)
 }
+
