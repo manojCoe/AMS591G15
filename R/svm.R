@@ -1,56 +1,96 @@
 library(e1071)
 
-svmModel <- function(x, y, cv = FALSE, kernel = "radial", cost = 1, gamma = NULL, cross = 5, epsilon = 0.1) {
-    if (cv && is.null(gamma)) {
-        stop("gamma parameter must be provided for cross-validation")
+svmModel = function(data, importance = FALSE, responseVariable, kernel = "radial", type = "default", cost = 1, gamma = NULL, epsilon = 0.1, degree = 3, coef0 = 0, nfolds = 10) {
+    if (!is.null(gamma) && !is.numeric(gamma)) {
+        stop("gamma parameter must be numeric")
     }
-    if(class(cv) != "logical"){
-        stop("cv (Cross Validation) parameter accepts only 'logical' type values ")
+    if(!is.logical(importance)){
+        stop("importance parameter accepts only 'logical' type values TRUE/FALSE")
     }
     if( !(kernel %in% c("linear", "radial", "polynomial", "sigmoid")) ){
         stop("Please provide a valid kernel type: ('linear', 'radial', 'polynomial', 'sigmoid')")
     }
-    if(class(epsilon) != "numeric"){
+    if(!is.numeric(epsilon)){
         stop("epsilon parameter accepts only 'numeric' type values ")
     }
-    if(class(cost) != "numeric"){
+    if(!is.numeric(cost)){
         stop("cost parameter accepts only 'numeric' type values ")
     }
-
-    x = convertCatToNumeric(data.frame(x), intercept = FALSE)
-    x = x$data
-
-    # Convert target to factor for classification
-    y <- as.factor(y)
-
-    if (cv) {
-        tune.control <- tune.control(sampling = "cross", cross = cross)
-
-        if (kernel == "linear") {
-            fit <- tune(svm, y ~ ., data = x, kernel = "linear", cost = cost, tunecontrol = tune.control)
-        } else if (kernel == "radial") {
-            if (is.null(gamma)) {
-                fit <- tune(svm, y ~ ., data = x, kernel = "radial", cost = cost, tunecontrol = tune.control)
-            } else {
-                fit <- tune(svm, y ~ ., data = x, kernel = "radial", cost = cost, gamma = gamma, tunecontrol = tune.control)
-            }
-        } else {
-            stop("Unsupported kernel type")
-        }
-    } else {
-        if (kernel == "linear") {
-            fit <- svm(y ~ ., data = x, kernel = "linear", cost = cost)
-        } else if (kernel == "radial") {
-            if (is.null(gamma)) {
-                fit <- svm(y ~ ., data = x, kernel = "radial", cost = cost)
-            } else {
-                fit <- svm(y ~ ., data = x, kernel = "radial", cost = cost, gamma = gamma)
-            }
-        } else {
-            stop("Unsupported kernel type")
-        }
+    if(!is.numeric(coef0)){
+        stop("coef0 parameter accepts only 'numeric' type values ")
+    }
+    if(!is.numeric(degree)){
+        stop("degree parameter accepts only 'numeric' type values ")
     }
 
-    return(fit)
+    if(!is.data.frame(data)){
+        stop("data must be a dataframe")
+    }
+    if(!is.character(responseVariable)){
+        stop("parameter 'responseVariable' must be a string")
+    }
+
+    x = data[, !names(data) %in% responseVariable, drop = FALSE]
+    y = data[, responseVariable, drop = FALSE]
+
+    y_copy = as.matrix(y)
+
+    x = convertCatToNumeric(x, intercept = FALSE, toDataFrame = FALSE)
+    x = x$data
+    x_copy = x
+    x = scale(x)
+    svmType = "eps-regression"
+    # Convert target to factor for multinomial classification
+    if ( type == "class" & length(unique(y)) >= 2) {
+        y = as.factor(y)
+        svmType = "C-classification"
+    } else{
+        y = data.frame(y)
+    }
+    data = cbind(x, y)
+
+    cat("class of x_copy: ", class(x_copy))
+    cat("class of y_copy: ", class(y_copy))
+
+
+
+    if(importance){
+        cv.fit = crossValidation(x_copy, y_copy, alpha = 1, type = type, nfolds = nfolds)
+        print(cv.fit)
+        print(coef(cv.fit$fit))
+        parameter_grid <- list(
+            linear = expand.grid(cost = c(0.1, 1, 10)),
+            polynomial = expand.grid(cost = c(0.1, 1, 10), degree = c(2, 3, 4)),
+            radial = expand.grid(cost = 10^seq(-2, 1.5, by = 0.5)),
+            sigmoid = expand.grid(cost = c(0.1, 1, 10), gamma = c(0.1, 1, 10), coef0 = c(0, 1, 2))
+        )
+
+        print(parameter_grid[[kernel]])
+
+
+        tune.control = tune.control(sampling = "cross", cross = nfolds)
+        finalData = cbind(data[, cv.fit$features], y)
+        fit = tune(svm, y ~ ., data = finalData, kernel = kernel, tunecontrol = tune.control, ranges = parameter_grid[[kernel]], type = svmType)
+
+        return(fit$best.model)
+    }
+    else{
+        if (kernel == "linear") {
+            fit <- svm(y ~ ., data = data, kernel = "linear", cost = cost, epsilon = epsilon)
+        } else if (kernel == "radial") {
+            if (is.null(gamma)) {
+                fit <- svm(y ~ ., data = data, kernel = "radial", cost = cost, epsilon = epsilon)
+            } else {
+                fit <- svm(y ~ ., data = data, kernel = "radial", cost = cost, gamma = gamma, epsilon = epsilon)
+            }
+        } else if (kernel == "polynomial") {
+            fit <- svm(y ~ ., data = data, kernel = "polynomial", cost = cost, degree = degree, coef0 = coef0, epsilon = epsilon)
+        } else if (kernel == "sigmoid") {
+            fit <- svm(y ~ ., data = data, kernel = "sigmoid", cost = cost, gamma = gamma, coef0 = coef0, epsilon = epsilon)
+        }
+
+        return(fit)
+    }
+
 }
 

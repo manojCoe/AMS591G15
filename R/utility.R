@@ -1,4 +1,4 @@
-convertCatToNumeric = function(x, intercept = TRUE){
+convertCatToNumeric = function(x, intercept = TRUE, toDataFrame = FALSE){
     # print("Inside convertCatToNumeric()")
     categoricalColumns = sapply(x, is.character)
     hasCategorical = FALSE
@@ -15,8 +15,11 @@ convertCatToNumeric = function(x, intercept = TRUE){
             x = modelMatrix
         }
     }
-    if(is.data.frame(x)){
+    if(!toDataFrame && is.data.frame(x)){
         x = as.matrix(x)
+    }
+    else if(toDataFrame && !is.data.frame(x)){
+        x = data.frame(x)
     }
     # print("executed convertCatToNumeric()")
     return(list(data = x, hasCategorical = hasCategorical))
