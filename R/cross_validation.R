@@ -12,11 +12,11 @@ crossValidation = function(x, y, alpha = 1, lambda = NULL, nfolds = 10, type = "
     x <- x$data
 
     # Convert target to factor for multinomial classification
-    if ( type == "class" & length(unique(y)) > 2) {
+    if ( type == "class" & length(unique(y)) >= 2) {
         y <- as.factor(y)
     }
-    print(class(x))
-    print(head(x))
+    # print(class(x))
+    # print(head(x))
 
 
     if(type == "class"){

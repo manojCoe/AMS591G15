@@ -1,6 +1,6 @@
 library(glmnet)
 
-elastic_net_regression <- function(x, y, alpha = 0.5, lambda = NULL, importance = FALSE, type = "default", nfolds = 5) {
+elastic_net_regression <- function(x, y, alpha = 0.5, lambda = NULL, importance = FALSE, type = "default", nfolds = 5, ignoreWarnings = T) {
     if (!is.numeric(alpha)) {
         stop("alpha parameter must be a numeric value")
     }
@@ -36,7 +36,9 @@ elastic_net_regression <- function(x, y, alpha = 0.5, lambda = NULL, importance 
 
     if (is.null(lambda)) {
         lambda <- 0.01
-        warning("Please provide lambda. Setting lambda to default value 0.01")
+        if(!ignoreWarnings){
+            warning("Please provide lambda. Setting lambda to default value 0.01")
+        }
     }
     if(type == "class"){
         if (length(unique(y)) == 2) {

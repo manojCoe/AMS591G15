@@ -1,6 +1,6 @@
 library(glmnet)
 
-linear_regression <- function(x, y, alpha = 1, lambda = NULL, importance = FALSE, type = "default", nfolds = 10) {
+linear_regression <- function(x, y, alpha = 1, lambda = NULL, importance = FALSE, type = "default", nfolds = 10, ignoreWarnings = T) {
     if (!is.numeric(alpha)) {
         stop("alpha parameter must be a numeric value")
     }
@@ -30,14 +30,13 @@ linear_regression <- function(x, y, alpha = 1, lambda = NULL, importance = FALSE
         print(cv.fit)
         x = x[, cv.fit$features]
         lambda = cv.fit$bestLambda
-        # fit = glmnet(x[, cv.fit$features], y, alpha = alpha, lambda = cv.fit$bestLambda)
-        # result = list(fit = fit, coef = coef(fit), features = cv.fit$features)
-        # return(result)
     }
 
     if (is.null(lambda)) {
         lambda <- 0.01
-        warning("Please provide lambda. Setting lambda to default value 0.01")
+        if(!ignoreWarnings){
+            warning("Please provide lambda. Setting lambda to default value 0.01")
+        }
     }
 
 
