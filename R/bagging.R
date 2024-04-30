@@ -1,17 +1,18 @@
 library(glmnet)
 
-bagging <- function(x, y, formula, model_type, R, type = "response", lambda = NULL, alpha = NULL, bagging_type = "average") {
+bagging <- function(x, y, formula, testData, model_type, R = 10, type = "response", lambda = NULL, alpha = NULL, bagging_type = "average") {
+    variable_importance = setNames(rep(0, ncol(x)), colnames(x)) # Variable importance score
     data = data.frame(x,y)
     n <- nrow(data)
+    selected_vars = colnames(x)
     p <- ncol(data) - 1  # Number of predictor variables
     predicted_values <- matrix(NA, nrow = n, ncol = R)  # Matrix to store predicted values from each model
-    variable_importance <- rep(0, p)  # Variable importance score
     coefficients = NULL
     # if(!is.matrix(y)){
     #     y = as.matrix(y)
     # }
-    for (i in 1:R) {
-        # print(paste("Iterration: ", i))
+    for (i in 1:R-1) {
+        print(paste("Iterration: ", i))
         # Generate bootstrap sample
         sample_indices <- sample(1:n, replace = TRUE)
         bootstrap_data <- data[sample_indices, ]
@@ -29,13 +30,29 @@ bagging <- function(x, y, formula, model_type, R, type = "response", lambda = NU
         } else if (model_type == "ridge") {
             model <- cv.glmnet(as.matrix(bootstrap_data[, -ncol(bootstrap_data)]), bootstrap_data[, ncol(bootstrap_data)], alpha = 0)
         } else if (model_type == "lasso") {
-            model <- cv.glmnet(as.matrix(bootstrap_data[, -ncol(bootstrap_data)]),
-                               bootstrap_data[, ncol(bootstrap_data)], alpha = 1, lambda = lambda)
+            # model <- cv.glmnet(as.matrix(bootstrap_data[, -ncol(bootstrap_data)]),
+            #                    bootstrap_data[, ncol(bootstrap_data)], alpha = 1, lambda = lambda)
+            model = lasso_regression(x = as.matrix(bootstrap_data[, -ncol(bootstrap_data)]),
+                                     y = bootstrap_data[, ncol(bootstrap_data)],
+                                     alpha = 1,
+                                     importance = TRUE,
+                                     type = type)
+            coefficients = model$coef
+            selected_vars = model$selectedFeatures
+            model = model$fit
+            # print(selectedFeatures)
+            for (key in names(variable_importance)) {
+                if (key %in% selectedFeatures) {
+                    variable_importance[[key]] <- variable_importance[[key]] + 1
+                }
+            }
+            # print(variable_importance)
         } else if (model_type == "elastic_net") {
             model <- cv.glmnet(as.matrix(bootstrap_data[, -ncol(bootstrap_data)]),
                                bootstrap_data[, ncol(bootstrap_data)], alpha = 0.5)
         }
-        if(type == "response"){
+
+        if(type == "default"){
             if(model_type == "linear"){
                 predicted_values[, i] = predict_regression(coef(model), data[, -length(data)])
             }
@@ -45,7 +62,7 @@ bagging <- function(x, y, formula, model_type, R, type = "response", lambda = NU
 
         }
         else{
-            predicted_values[, i] <- predict(model, as.data.frame(data[, -length(data)]))
+            predicted_values[, i] <- predict(model, as.matrix(data[, -length(data)][, selected_vars]), type = "class")
         }
         # Make predictions on original dataset
         # print(tail(predicted_values))
@@ -54,13 +71,16 @@ bagging <- function(x, y, formula, model_type, R, type = "response", lambda = NU
         # #( ME COMMENTING)
         # # Update variable importance score
         if (model_type != "linear" && model_type != "logistic") {
-            coefficients = coef(model)
-            if(!is.matrix(coefficients)){
-                coefficients = as.matrix(coefficients)
-                coefficients_matrix_without_intercept = coefficients[-1, ]
-            }
-            selected_vars <- which(coefficients_matrix_without_intercept != 0)
-            variable_importance[selected_vars] <- variable_importance[selected_vars] + 1
+            # print(coef(model))
+            # coefficients = coef(model)
+            # if(!is.matrix(coefficients)){
+            #     coefficients = as.matrix(coefficients)
+            #     coefficients_matrix_without_intercept = coefficients[-1, ]
+            # }
+            # selected_vars <- which(sapply(coefficients_matrix_without_intercept, function(x) x != 0))
+
+            # variable_importance[selected_vars] <- variable_importance[selected_vars] + 1
+            coefficients = coefficients
         } else if (model_type == "linear") {
             coef_abs <- abs(coef(model)[-1])  # Exclude intercept
             variable_importance[order(coef_abs, decreasing = TRUE)] <- variable_importance[order(coef_abs, decreasing = TRUE)] + 1
@@ -74,7 +94,9 @@ bagging <- function(x, y, formula, model_type, R, type = "response", lambda = NU
             # Extract the absolute values of coefficients
             coefficients_matrix_without_intercept <- coefficients_matrix[-1, , drop = FALSE]
 
-            selected_vars <- which(coefficients_matrix_without_intercept != 0)
+            coefficients = coefficients_matrix_without_intercept
+
+            selected_vars <- which(sapply(coefficients_matrix_without_intercept, function(x) x != 0))
 
             # Increment count of important predictors for each iteration
             variable_importance[selected_vars] <- variable_importance[selected_vars] + 1
@@ -100,12 +122,13 @@ bagging <- function(x, y, formula, model_type, R, type = "response", lambda = NU
     # }
 
     # #(* ME COMMENTING)
-    print(dim(predicted_values))
+    # print(dim(predicted_values))
+    # variable_importance <- variable_importance / R
     # # Average predicted values or perform majority vote
     if(bagging_type == "average"){
         final_predicted_values = rowMeans(predicted_values)
         rmse_score = rmse(final_predicted_values, y)
-        variable_importance <- variable_importance / R
+
         if(is.null(coefficients)){
             coefficients = coef(model)
         }
@@ -116,8 +139,8 @@ bagging <- function(x, y, formula, model_type, R, type = "response", lambda = NU
         final_predicted_values = apply(predicted_values, 1, function(x) {
             names(which.max(table(x)))
         })
-        variable_importance <- variable_importance / R
-        return(list(predictions = final_predicted_values, variable_importance = variable_importance, results = table(y, final_predicted_values), coefficients = coefficients))
+        # variable_importance <- variable_importance / R
+        return(list(predictions = final_predicted_values, variable_importance = variable_importance, results = table(y, final_predicted_values)))
     }
     #
     # print(paste("variable importance count: ", variable_importance))

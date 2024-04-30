@@ -44,7 +44,7 @@ lasso_regression <- function(x, y, alpha = 1, lambda = NULL, importance = FALSE,
     else{
         fit = glmnet(x, y, alpha = alpha, lambda = lambda)
     }
-    result = list(fit = fit, coef = coef(fit))
+    result = list(fit = fit, coef = coef(fit), selectedFeatures = colnames(x))
     return(result)
 }
 

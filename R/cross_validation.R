@@ -18,6 +18,7 @@ crossValidation = function(x, y, alpha = 1, lambda = NULL, nfolds = 10, type = "
     print(class(x))
     print(head(x))
 
+
     if(type == "class"){
         if (length(unique(y)) == 2) {
             # Binary classification
@@ -34,7 +35,6 @@ crossValidation = function(x, y, alpha = 1, lambda = NULL, nfolds = 10, type = "
     # Retrieve the best lambda value
     best_lambda <- fit$lambda.min
     print(paste("best lambda: ", best_lambda))
-    print("")
     if((type != "class") || (type == "class" && length(unique(y))<=2)){
         selectedFeatures = getInformativePredictors(fit)
     }
@@ -42,7 +42,7 @@ crossValidation = function(x, y, alpha = 1, lambda = NULL, nfolds = 10, type = "
         coefficients = as.matrix(coef(fit, s = "lambda.min"))
         coefficients_sum <- Reduce(`+`, coefficients)
         coefficients_matrix <- as.matrix(coefficients_sum)[-1, , drop=FALSE]
-        selected_vars <- which(coefficients_matrix != 0)
+        selected_vars <- which(sapply(coefficients_matrix, function(x) x != 0))
         # selected_indices <- order(coefficients_matrix, decreasing = TRUE)
         selectedFeatures <- names(coefficients_matrix[selected_vars, ])
 
