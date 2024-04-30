@@ -44,12 +44,20 @@ logisticRegression <- function(x, y, cv = FALSE, useRegularization = FALSE, alph
         else if(length(lambdaList) > 0){
             if (length(unique(y)) == 2) {
                 # Binary classification
-                fit <- cv.glmnet(x, y, family = "binomial", alpha = alpha, lambda = lambda)
+                fit <- cv.glmnet(x, y, family = "binomial", alpha = alpha, lambda = lambdaList)
             } else {
                 # Multiclass classification
-                fit <- cv.glmnet(x, y, family = "multinomial", alpha = alpha, lambda = lambda)
+                fit <- cv.glmnet(x, y, family = "multinomial", alpha = alpha, lambda = lambdaList)
             }
         }
+        # Get the index of the lambda value with the minimum mean cross-validated error
+        best_lambda_index <- which.min(fit$cvm)
+
+        # Retrieve the best lambda value
+        best_lambda <- fit$lambda[best_lambda_index]
+
+        # Refit the model using the best lambda value
+        fit <- glmnet(x, y, alpha = alpha, lambda = best_lambda)
     }
     else{
         if(is.null(lambda)){

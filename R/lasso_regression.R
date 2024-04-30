@@ -7,6 +7,15 @@ lasso_regression <- function(x, y, alpha = 1, lambda = NULL, importance = FALSE,
     if (!is.null(lambda) && !is.numeric(lambda)) {
         stop("lambda parameter must be a numeric value")
     }
+    if(!is.character(type)){
+        stop("parameter 'type' must be a string. One of ('default', 'class')")
+    }
+    if(!is.logical(importance)){
+        stop("parameter 'importance' must be of type logical TRUE/FALSE")
+    }
+    if(!is.numeric(nfolds)){
+        stop("parameter 'nfolds' must be of type numeric.")
+    }
     if(is.matrix(x)){
         x = data.frame(x)
     }
@@ -23,9 +32,6 @@ lasso_regression <- function(x, y, alpha = 1, lambda = NULL, importance = FALSE,
         print(cv.fit)
         x = x[, cv.fit$features]
         lambda = cv.fit$bestLambda
-        # fit = glmnet(x[, cv.fit$features], y, alpha = alpha, lambda = cv.fit$bestLambda)
-        # result = list(fit = fit, coef = coef(fit), features = cv.fit$features)
-        # return(result)
     }
 
     if (is.null(lambda)) {

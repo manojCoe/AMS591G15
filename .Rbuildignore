@@ -5,3 +5,5 @@
 ^tests$
 ^tests/test.R$
 ^tests/svmTest.R$
+^tests/logisticTest.R$
+^tests/linearTest.R$

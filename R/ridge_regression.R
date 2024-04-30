@@ -1,6 +1,6 @@
 library(glmnet)
 
-elastic_net_regression <- function(x, y, alpha = 0.5, lambda = NULL, importance = FALSE, type = "default", nfolds = 5) {
+ridge_regression <- function(x, y, alpha = 1, lambda = NULL, importance = FALSE, type = "default", nfolds = 10) {
     if (!is.numeric(alpha)) {
         stop("alpha parameter must be a numeric value")
     }
@@ -23,7 +23,7 @@ elastic_net_regression <- function(x, y, alpha = 0.5, lambda = NULL, importance 
     x <- x$data
 
     # Convert target to factor for multinomial classification
-    if ( type == "class" & length(unique(y)) >= 2) {
+    if ( type == "class" & length(unique(y)) > 2) {
         y <- as.factor(y)
     }
 

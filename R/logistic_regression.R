@@ -1,6 +1,6 @@
 library(glmnet)
 
-elastic_net_regression <- function(x, y, alpha = 0.5, lambda = NULL, importance = FALSE, type = "default", nfolds = 5) {
+logistic_regression <- function(x, y, alpha = 1, lambda = NULL, importance = FALSE, type = "default", nfolds = 10) {
     if (!is.numeric(alpha)) {
         stop("alpha parameter must be a numeric value")
     }
@@ -9,6 +9,9 @@ elastic_net_regression <- function(x, y, alpha = 0.5, lambda = NULL, importance 
     }
     if(!is.character(type)){
         stop("parameter 'type' must be a string. One of ('default', 'class')")
+    }
+    if(type != "class"){
+        stop("Logistic regression only supports type = class")
     }
     if(!is.logical(importance)){
         stop("parameter 'importance' must be of type logical TRUE/FALSE")
@@ -23,12 +26,10 @@ elastic_net_regression <- function(x, y, alpha = 0.5, lambda = NULL, importance 
     x <- x$data
 
     # Convert target to factor for multinomial classification
-    if ( type == "class" & length(unique(y)) >= 2) {
-        y <- as.factor(y)
-    }
+    y = as.factor(y)
 
     if(importance){
-        cv.fit = crossValidation(x, y, alpha = alpha, type = type, nfolds = nfolds)
+        cv.fit = crossValidation(x, y, alpha = alpha, type = "class", nfolds = nfolds)
         print(cv.fit)
         x = x[, cv.fit$features]
         lambda = cv.fit$bestLambda
