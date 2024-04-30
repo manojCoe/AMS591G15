@@ -14,7 +14,7 @@ lasso_regression <- function(x, y, alpha = 1, lambda = NULL, importance = FALSE,
     x <- x$data
 
     # Convert target to factor for multinomial classification
-    if ( type == "class" & length(unique(y)) > 2) {
+    if ( type == "class" & length(unique(y)) >= 2) {
         y <- as.factor(y)
     }
 

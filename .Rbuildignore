@@ -2,4 +2,6 @@
 ^renv\.lock$
 ^.*\.Rproj$
 ^\.Rproj\.user$
-tests/test.R
+^tests$
+^tests/test.R$
+^tests/svmTest.R$

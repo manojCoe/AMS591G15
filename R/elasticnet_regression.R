@@ -14,16 +14,18 @@ elastic_net_regression <- function(x, y, alpha = 0.5, lambda = NULL, importance 
     x <- x$data
 
     # Convert target to factor for multinomial classification
-    if ( type == "class" & length(unique(y)) > 2) {
+    if ( type == "class" & length(unique(y)) >= 2) {
         y <- as.factor(y)
     }
 
     if(importance){
         cv.fit = crossValidation(x, y, alpha = alpha, type = type, nfolds = nfolds)
         print(cv.fit)
-        fit = glmnet(x[, cv.fit$features], y, alpha = alpha, lambda = cv.fit$bestLambda)
-        result = list(fit = fit, coef = coef(fit), features = cv.fit$features)
-        return(result)
+        x = x[, cv.fit$features]
+        lambda = cv.fit$bestLambda
+        # fit = glmnet(x[, cv.fit$features], y, alpha = alpha, lambda = cv.fit$bestLambda)
+        # result = list(fit = fit, coef = coef(fit), features = cv.fit$features)
+        # return(result)
     }
 
     if (is.null(lambda)) {
