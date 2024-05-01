@@ -4,22 +4,22 @@ svmModel = function(data, importance = FALSE, responseVariable, kernel = "radial
     if (!is.null(gamma) && !is.numeric(gamma)) {
         stop("gamma parameter must be numeric")
     }
-    if(!is.logical(importance)){
+    if(!is.null(importance) && !is.logical(importance)){
         stop("importance parameter accepts only 'logical' type values TRUE/FALSE")
     }
     if( !(kernel %in% c("linear", "radial", "polynomial", "sigmoid")) ){
         stop("Please provide a valid kernel type: ('linear', 'radial', 'polynomial', 'sigmoid')")
     }
-    if(!is.numeric(epsilon)){
+    if(!is.null(epsilon) && !is.numeric(epsilon)){
         stop("epsilon parameter accepts only 'numeric' type values ")
     }
-    if(!is.numeric(cost)){
+    if(!is.null(cost) && !is.numeric(cost)){
         stop("cost parameter accepts only 'numeric' type values ")
     }
-    if(!is.numeric(coef0)){
+    if(!is.null(coef0) && !is.numeric(coef0)){
         stop("coef0 parameter accepts only 'numeric' type values ")
     }
-    if(!is.numeric(degree)){
+    if(!is.null(degree) &&!is.numeric(degree)){
         stop("degree parameter accepts only 'numeric' type values ")
     }
 
@@ -35,22 +35,31 @@ svmModel = function(data, importance = FALSE, responseVariable, kernel = "radial
 
     y_copy = as.matrix(y)
 
+    svmType = "eps-regression"
+    if ( type == "class" & length(unique(y_copy)) >= 2) {
+        y = as.factor(y_copy)
+        svmType = "C-classification"
+    }
+
+    print(paste("svmType: ", svmType))
+
+    # else{
+    #     print("------")
+    #     print(unique(y))
+    #     y = data.frame(y)
+    # }
+
     x = convertCatToNumeric(x, intercept = FALSE, toDataFrame = FALSE)
     x = x$data
     x_copy = x
     x = scale(x)
-    svmType = "eps-regression"
-    # Convert target to factor for multinomial classification
-    if ( type == "class" & length(unique(y)) >= 2) {
-        y = as.factor(y)
-        svmType = "C-classification"
-    } else{
-        y = data.frame(y)
-    }
-    data = cbind(x, y)
 
-    cat("class of x_copy: ", class(x_copy))
-    cat("class of y_copy: ", class(y_copy))
+    # Convert target to factor for multinomial classification
+
+    data = data.frame(x, y)
+
+    # cat("class of x_copy: ", class(x_copy))
+    # cat("class of y_copy: ", class(y_copy))
 
 
 
@@ -69,24 +78,25 @@ svmModel = function(data, importance = FALSE, responseVariable, kernel = "radial
 
 
         tune.control = tune.control(sampling = "cross", cross = nfolds)
-        finalData = cbind(data[, cv.fit$features], y)
+        finalData = data.frame(data[, cv.fit$features], y)
         fit = tune(svm, y ~ ., data = finalData, kernel = kernel, tunecontrol = tune.control, ranges = parameter_grid[[kernel]], type = svmType)
 
         return(fit$best.model)
     }
     else{
+        print(class(data$y))
         if (kernel == "linear") {
-            fit <- svm(y ~ ., data = data, kernel = "linear", cost = cost, epsilon = epsilon)
+            fit <- svm(y ~ ., data = data, kernel = "linear", cost = cost, epsilon = epsilon, type = svmType)
         } else if (kernel == "radial") {
             if (is.null(gamma)) {
-                fit <- svm(y ~ ., data = data, kernel = "radial", cost = cost, epsilon = epsilon)
+                fit <- svm(y ~ ., data = data, kernel = "radial", cost = cost, epsilon = epsilon, type = svmType)
             } else {
-                fit <- svm(y ~ ., data = data, kernel = "radial", cost = cost, gamma = gamma, epsilon = epsilon)
+                fit <- svm(y ~ ., data = data, kernel = "radial", cost = cost, gamma = gamma, epsilon = epsilon, type = svmType)
             }
         } else if (kernel == "polynomial") {
-            fit <- svm(y ~ ., data = data, kernel = "polynomial", cost = cost, degree = degree, coef0 = coef0, epsilon = epsilon)
+            fit <- svm(y ~ ., data = data, kernel = "polynomial", cost = cost, degree = degree, coef0 = coef0, epsilon = epsilon, type = svmType)
         } else if (kernel == "sigmoid") {
-            fit <- svm(y ~ ., data = data, kernel = "sigmoid", cost = cost, gamma = gamma, coef0 = coef0, epsilon = epsilon)
+            fit <- svm(y ~ ., data = data, kernel = "sigmoid", cost = cost, gamma = gamma, coef0 = coef0, epsilon = epsilon, type = svmType)
         }
 
         return(fit)

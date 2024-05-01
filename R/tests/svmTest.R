@@ -1,9 +1,10 @@
 # ===========================================
 # svm
 # ===========================================
+library(e1071)
 
-# PATH = "C:/Users/coe16/Downloads/Mystery.csv"
-PATH = "C:/Users/coe16/Downloads/Enigma.csv"
+PATH = "C:/Users/MSP/Downloads/Mystery.csv"
+# PATH = "C:/Users/MSP/Downloads/Enigma.csv"
 
 df = read.csv(PATH)
 #
@@ -21,15 +22,15 @@ y = trainData$y
 data = cbind(x, y)
 tune.control = tune.control(sampling = "cross", cross = 10)
 
-# model = svmModel(data, responseVariable = "y", importance = TRUE, kernel = "radial")
-model = svmModel(data, responseVariable = "y", importance = TRUE, kernel = "radial", type = "class")
+model = svmModel(data, responseVariable = "y", importance = TRUE, kernel = "radial")
+# model = svmModel(data, responseVariable = "y", importance = TRUE, kernel = "radial", type = "class")
 
 testSet = convertCatToNumeric(subset(testData, select = -y), intercept = FALSE)
 testSet = scale(testSet$data)
 
 # Predict on the test set
 # predictions <- predict(model, testSet, type = "response")
-predictions <- predict(model, testSet, type = "classs")
+# predictions <- predict(model, testSet, type = "class")
 
 # =========================
 # For regression
@@ -38,15 +39,16 @@ rmse(preds, testData$y)
 
 # =========================
 # For classification
-
-preds = ifelse(predictions > 0.5, 1, 0)
+predictions <- predict(model, testSet, type = "class")
+head(predictions)
+# preds = ifelse(predictions > 0.5, 1, 0)
 # # predictions =  factor(predictions, levels = 1:2, labels = c(0, 1))
 head(predictions)
 # Compute accuracy
 library(caret)
-head(preds)
+# head(preds)
 
-confusionMatrix(as.factor(testData$y), as.factor(preds))
+confusionMatrix(as.factor(testData$y), as.factor(predictions))
 
 # =======================================
 # Using iris data
