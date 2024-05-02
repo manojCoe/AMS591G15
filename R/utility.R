@@ -54,9 +54,11 @@ preprocessTestData = function(testSet, intercept = TRUE, features = NULL){
 
     if(!hasCategorical & intercept){
         print("Adding intercept column to matrix.")
-        x = cbind(1, x)
+        x = convertCatToNumeric(testSet, intercept)
     }
-    x = as.matrix(x)
+    if(!is.matrix(x)){
+        x = as.matrix(x)
+    }
     return(x)
 }
 

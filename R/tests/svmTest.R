@@ -3,8 +3,8 @@
 # ===========================================
 library(e1071)
 
-PATH = "C:/Users/MSP/Downloads/Mystery.csv"
-# PATH = "C:/Users/MSP/Downloads/Enigma.csv"
+# PATH = "C:/Users/MSP/Downloads/Mystery.csv"
+PATH = "C:/Users/MSP/Downloads/Enigma.csv"
 
 df = read.csv(PATH)
 #
@@ -20,26 +20,25 @@ x = subset(trainData, select = -y)
 y = trainData$y
 
 data = cbind(x, y)
-tune.control = tune.control(sampling = "cross", cross = 10)
 
-model = svmModel(data, responseVariable = "y", importance = TRUE, kernel = "radial")
-# model = svmModel(data, responseVariable = "y", importance = TRUE, kernel = "radial", type = "class")
+# model = svmModel(data, responseVariable = "y", importance = FALSE, kernel = "radial")
+model = svmModel(data, responseVariable = "y", importance = F, kernel = "radial", type = "class")
 
-testSet = convertCatToNumeric(subset(testData, select = -y), intercept = FALSE)
-testSet = scale(testSet$data)
-
+testSet = preprocessTestData(subset(testData, select = -y), intercept = FALSE)
+testSet = scale(testSet)
+test_x = testSet[, model$selectedFeatures]
 # Predict on the test set
 # predictions <- predict(model, testSet, type = "response")
 # predictions <- predict(model, testSet, type = "class")
 
 # =========================
 # For regression
-preds = predict(model, testSet)
+preds = predict(model$fit, test_x)
 rmse(preds, testData$y)
 
 # =========================
 # For classification
-predictions <- predict(model, testSet, type = "class")
+predictions <- predict(model$fit, testSet, type = "class")
 head(predictions)
 # preds = ifelse(predictions > 0.5, 1, 0)
 # # predictions =  factor(predictions, levels = 1:2, labels = c(0, 1))
@@ -60,19 +59,19 @@ trainID <- sample(1:nrow(df),round(0.75*nrow(df)))
 trainData <- df[trainID,]
 testData <- df[-trainID,]
 
-x = subset(trainData, select = -Species)
+x = as.matrix(subset(trainData, select = -Species))
 # x = scale(x)
 y = trainData$Species
 
-data = cbind(x, y)
+data = data.frame(x, y)
 tune.control = tune.control(sampling = "cross", cross = 10)
 
-model = svmModel(data, responseVariable = "y", importance = FALSE, kernel = "radial", type = "class")
+model = svmModel(data, responseVariable = "y", importance = TRUE, kernel = "radial", type = "class")
 
 testSet = convertCatToNumeric(subset(testData, select = -Species), intercept = FALSE)
 testSet = scale(testSet$data)
 
-predictions <- predict(model, testSet, type = "class")
+predictions <- predict(model$fit, testSet, type = "class")
 
 # preds = ifelse(predictions > 0.5, 1, 0)
 # predictions =  factor(predictions, levels = 1:2, labels = c(0, 1))
@@ -80,4 +79,4 @@ head(predictions)
 # Compute accuracy
 library(caret)
 
-confusionMatrix(as.factor(testData$Species), predictions)
+confusionMatrix(as.factor(testData$Species), as.factor(predictions))

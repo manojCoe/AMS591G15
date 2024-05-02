@@ -36,7 +36,7 @@ svmModel = function(data, importance = FALSE, responseVariable, kernel = "radial
     y_copy = as.matrix(y)
 
     svmType = "eps-regression"
-    if ( type == "class" & length(unique(y_copy)) >= 2) {
+    if ( type == "class") {
         y = as.factor(y_copy)
         svmType = "C-classification"
     }
@@ -81,7 +81,7 @@ svmModel = function(data, importance = FALSE, responseVariable, kernel = "radial
         finalData = data.frame(data[, cv.fit$features], y)
         fit = tune(svm, y ~ ., data = finalData, kernel = kernel, tunecontrol = tune.control, ranges = parameter_grid[[kernel]], type = svmType)
 
-        return(fit$best.model)
+        return(list(fit = fit$best.model, selectedFeatures = colnames(data[, cv.fit$features])))
     }
     else{
         print(class(data$y))
@@ -99,7 +99,7 @@ svmModel = function(data, importance = FALSE, responseVariable, kernel = "radial
             fit <- svm(y ~ ., data = data, kernel = "sigmoid", cost = cost, gamma = gamma, coef0 = coef0, epsilon = epsilon, type = svmType)
         }
 
-        return(fit)
+        return(list(fit = fit, selectedFeatures = colnames(data[, -ncol(data)])))
     }
 
 }

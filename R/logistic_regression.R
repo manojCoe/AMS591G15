@@ -1,6 +1,6 @@
 library(glmnet)
 
-logistic_regression <- function(x, y, alpha = 1, lambda = NULL, importance = FALSE, type = "default", nfolds = 10, ignoreWarnings = T) {
+logistic_regression <- function(x, y, alpha = alpha, lambda = NULL, importance = FALSE, type = "default", nfolds = 10, ignoreWarnings = T) {
     if (!is.numeric(alpha)) {
         stop("alpha parameter must be a numeric value")
     }

@@ -7,7 +7,8 @@ trainID <- sample(1:nrow(df),round(0.75*nrow(df)))
 trainData <- df[trainID,]
 testData <- df[-trainID,]
 
-x = convertCatToNumeric(subset(trainData, select = -y), intercept = FALSE)$data
+# x = convertCatToNumeric(subset(trainData, select = -y), intercept = FALSE)$data
+x = model.matrix(y ~ ., data = trainData)[, -1]
 y = as.matrix(trainData$y)
 
 model = linear_regression(x, trainData$y, importance = TRUE, alpha = 0)

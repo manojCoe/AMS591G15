@@ -22,8 +22,18 @@ linear_regression <- function(x, y, alpha = 1, lambda = NULL, importance = FALSE
     if(is.matrix(x)){
         x = data.frame(x)
     }
+
+    if(length(colnames(x)) == 1){
+        data = data.frame(x, y)
+        fit = lm(y ~ x, data = data)
+        result = list(fit = fit, coef = coef(fit), selectedFeatures = "x")
+        return(result)
+    }
+
+
     x <- convertCatToNumeric(x, intercept = FALSE)
     x <- x$data
+
 
     if(importance){
         cv.fit = crossValidation(x, y, alpha = alpha, type = type, nfolds = nfolds)

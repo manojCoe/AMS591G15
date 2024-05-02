@@ -1,14 +1,22 @@
 library(glmnet)
 
-bagging <- function(x, y, testData, model_type, responseVariable = NULL, R = 10, type = "response", lambda = NULL, alpha = NULL, ignoreWarnings = T, importance = NULL) {
-    if(!is.data.frame(x) && !is.matrix(x)){
+bagging <- function(x, y, testData, model_type,
+                    responseVariable = NULL, R = 10,
+                    type = "default", lambda = NULL,
+                    alpha = NULL, ignoreWarnings = T,
+                    importance = NULL, nfolds = 10,
+                    kernel = "radial",cost = 1,
+                    degree = 3, coef0 = 0, gamma = NULL,
+                    epsilon = 0.1
+                    ) {
+    if(!is.data.frame(x) && !is.matrix(x) && !is.numeric(x)){
         print(class(x))
-        stop("x should be of type data.frame or matrix")
+        stop("x should be of type data.frame, matrix or numeric")
     }
     if(!is.data.frame(y) && !is.matrix(y) && !is.factor(y) && !is.numeric(y)){
         stop("y should be of type data.frame, matrix, factor or numeric")
     }
-    if(is.numeric(y) && type == "class"){
+    if(is.numeric(y) && type == "class" && !(model_type %in% c("svm", "logistic"))){
         stop("class has 1 or 0 observations; not allowed for regression model")
     }
     if(!is.data.frame(testData) && !is.matrix(testData)){
@@ -20,8 +28,8 @@ bagging <- function(x, y, testData, model_type, responseVariable = NULL, R = 10,
     if(is.null(responseVariable)){
         stop("parameter 'responseVariable' should be a string.")
     }
-    if( !(model_type %in% c("linear", "logistic", "ridge", "lasso", "elastic_net")) ){
-        stop("Please provide a valid model_type: ('linear', 'logistic', 'ridge', 'lasso', 'elastic_net')")
+    if( !(model_type %in% c("linear", "logistic", "ridge", "lasso", "elastic_net", "svm")) ){
+        stop("Please provide a valid model_type: ('linear', 'logistic', 'ridge', 'lasso', 'elastic_net', 'svm)")
     }
     if (!is.null(alpha) && !is.numeric(alpha)) {
         stop("alpha parameter must be a numeric value")
@@ -43,6 +51,26 @@ bagging <- function(x, y, testData, model_type, responseVariable = NULL, R = 10,
         if(!ignoreWarnings){
             warning("Missing alpha parameter. Setting to default value 0.5")
         }
+    }
+    if(!is.null(kernel) && !(kernel %in% c("linear", "radial", "polynomial", "sigmoid")) ){
+        stop("Please provide a valid kernel type: ('linear', 'radial', 'polynomial', 'sigmoid')")
+    }
+    if(!is.null(epsilon) && !is.numeric(epsilon)){
+        stop("epsilon parameter accepts only 'numeric' type values ")
+    }
+    if(!is.null(cost) && !is.numeric(cost)){
+        stop("cost parameter accepts only 'numeric' type values ")
+    }
+    if(!is.null(coef0) && !is.numeric(coef0)){
+        stop("coef0 parameter accepts only 'numeric' type values ")
+    }
+    if(!is.null(degree) &&!is.numeric(degree)){
+        stop("degree parameter accepts only 'numeric' type values ")
+    }
+
+    if(is.numeric(x)){
+        x = data.frame(x)
+        colnames(x) = "x"
     }
 
     variable_importance = setNames(rep(0, ncol(x)), colnames(x)) # Variable importance score
@@ -101,7 +129,9 @@ bagging <- function(x, y, testData, model_type, responseVariable = NULL, R = 10,
                                      alpha = 1,
                                      importance = importance,
                                      type = type,
-                                     ignoreWarnings = ignoreWarnings)
+                                     ignoreWarnings = ignoreWarnings,
+                                     nfolds = nfolds
+                                     )
             coefficients = model$coef
             selected_vars = model$selectedFeatures
             model = model$fit
@@ -115,10 +145,12 @@ bagging <- function(x, y, testData, model_type, responseVariable = NULL, R = 10,
             # model <- logisticRegression(x = bootstrap_data[, -ncol(bootstrap_data)], y = bootstrap_data[, ncol(bootstrap_data)], lambda = lambda)
             model = logistic_regression(x = as.matrix(bootstrap_data[, -ncol(bootstrap_data)]),
                                      y = bootstrap_data[, ncol(bootstrap_data)],
-                                     alpha = 1,
+                                     alpha = 0.5,
                                      importance = importance,
                                      type = type,
-                                     ignoreWarnings = ignoreWarnings)
+                                     ignoreWarnings = ignoreWarnings,
+                                     nfolds = nfolds
+                                    )
             coefficients = model$coef
             selected_vars = model$selectedFeatures
             model = model$fit
@@ -132,9 +164,12 @@ bagging <- function(x, y, testData, model_type, responseVariable = NULL, R = 10,
             # model <- cv.glmnet(as.matrix(bootstrap_data[, -ncol(bootstrap_data)]), bootstrap_data[, ncol(bootstrap_data)], alpha = 0)
             model = ridge_regression(x = as.matrix(bootstrap_data[, -ncol(bootstrap_data)]),
                                      y = bootstrap_data[, ncol(bootstrap_data)],
+                                     alpha = 0,
                                      importance = importance,
                                      type = type,
-                                     ignoreWarnings = ignoreWarnings)
+                                     ignoreWarnings = ignoreWarnings,
+                                     nfolds = nfolds
+                                    )
             coefficients = model$coef
             selected_vars = model$selectedFeatures
             model = model$fit
@@ -151,7 +186,10 @@ bagging <- function(x, y, testData, model_type, responseVariable = NULL, R = 10,
                                      y = bootstrap_data[, ncol(bootstrap_data)],
                                      importance = importance,
                                      type = type,
-                                     ignoreWarnings = ignoreWarnings)
+                                     alpha = 1,
+                                     ignoreWarnings = ignoreWarnings,
+                                     nfolds = nfolds
+                                     )
             coefficients = model$coef
             selected_vars = model$selectedFeatures
             model = model$fit
@@ -165,11 +203,34 @@ bagging <- function(x, y, testData, model_type, responseVariable = NULL, R = 10,
         } else if (model_type == "elastic_net") {
             model = elastic_net_regression(x = as.matrix(bootstrap_data[, -ncol(bootstrap_data)]),
                                      y = bootstrap_data[, ncol(bootstrap_data)],
-                                     alpha = alpha,
+                                     alpha = 0.5,
                                      importance = importance,
                                      type = type,
-                                     ignoreWarnings = ignoreWarnings)
+                                     ignoreWarnings = ignoreWarnings,
+                                     nfolds = nfolds
+                                     )
             coefficients = model$coef
+            selected_vars = model$selectedFeatures
+            model = model$fit
+            # print(selectedFeatures)
+            for (key in names(variable_importance)) {
+                if (key %in% selected_vars) {
+                    variable_importance[[key]] <- variable_importance[[key]] + 1
+                }
+            }
+        } else if(model_type == "svm"){
+            x = as.matrix(bootstrap_data[, -ncol(bootstrap_data)])
+            y = bootstrap_data[, ncol(bootstrap_data)]
+            data = data.frame(x, y)
+            # tune.control = tune.control(sampling = "cross", cross = nfolds)
+
+            model = svmModel(data, responseVariable = "y",
+                             importance = importance, kernel = kernel,
+                             type = type, cost = cost, gamma = NULL,
+                             epsilon = epsilon, degree = degree, coef0 = coef0, nfolds = nfolds
+            )
+            # model = svmModel(data, responseVariable = "y", importance = TRUE, kernel = "radial", type = "class")
+            testSet = scale(testSet)
             selected_vars = model$selectedFeatures
             model = model$fit
             # print(selectedFeatures)
@@ -180,21 +241,36 @@ bagging <- function(x, y, testData, model_type, responseVariable = NULL, R = 10,
             }
         }
         test_x = testSet[, selected_vars]
-        # print(class(test_x))
-        # cat("\n Head of test_x: \n", head(test_x), "\n")
-        # cat("\n selected_vars: \n", selected_vars, "\n")
 
-        if(type == "default"){
-            if(model_type == "linear"){
-                predicted_values[, i] = predict_regression(coefficients, test_x)
-            }
-            else{
-                predicted_values[, i] = predict_regression(coefficients, test_x)
+        if (model_type == "svm"){
+            if(type == "class"){
+                preds = predict(model, test_x, type = "class")
+                print(head(preds))
+                class_levels <- levels(model$fitted)
+                # Convert numerical labels to character labels using class levels
+                preds <- class_levels[preds]
+                predicted_values[, i] = preds
+            } else{
+                predicted_values[, i] = predict(model, test_x)
             }
 
         }
-        else{
-            predicted_values[, i] = predict(model,test_x, type = "class")
+        else {
+            if(type == "default"){
+                if(model_type == "linear"){
+                    if(is.numeric(test_x)){
+                        test_x = data.frame(test_x)
+                        colnames(test_x) = "x"
+                    }
+                    predicted_values[, i] = predict_regression(coefficients, test_x, model)
+                }
+                else{
+                    predicted_values[, i] = predict_regression(coefficients, test_x)
+                }
+
+            }  else{
+                predicted_values[, i] = predict(model, test_x, type = "class")
+            }
         }
         # Make predictions on original dataset
         # print(tail(predicted_values))

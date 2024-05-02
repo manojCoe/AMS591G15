@@ -11,11 +11,16 @@ testData <- df[-trainID,]
 # testSet = preprocessTestData(subset(testData, select = -Species), intercept = FALSE)
 x = model.matrix(Species ~ ., data = trainData)[, -1]
 y = trainData$Species
+
+
+res = ensemble(x, y, testData = testData, models = c("logistic", "elastic_net"), bagging = T, responseVariable = "Species", R = 10, type = "class", ignoreWarnings = F, importance = F, nfolds = 10)
+confusionMatrix(as.factor(res[[1]]), testData$Species)
+confusionMatrix(as.factor(res[[2]]), testData$Species)
+
 # data = data.frame(x, y)
 # y = as.factor(y)
-res = bagging(x, y, testData = testData, responseVariable = "Species", model_type = "logistic", R = 10, type = "class", ignoreWarnings = T, importance = T)
+# res = bagging(x, y, testData = testData, responseVariable = "Species", model_type = "logistic", R = 10, type = "class", ignoreWarnings = T, importance = T)
 
-res
 
 # binomial
 
@@ -35,12 +40,11 @@ testData <- df[-trainID,]
 head(trainData)
 
 x = as.matrix(subset(trainData, select = -y))
-y = trainData$y
+y = as.factor(trainData$y)
 
-res = bagging(x, y, importance = T, responseVariable = "y", testData = testData, model_type = "svm", R = 10, type = "class", ignoreWarnings = T)
-# testSet = preprocessTestData(subset(testData, select = -y), intercept = FALSE)
-
-confusionMatrix(as.factor(res$predictions), as.factor(testData$y))
+res = ensemble(x, y, testData = testData, models = c("logistic", "svm"), bagging = F, responseVariable = "y", R = 10, type = "class", ignoreWarnings = T, importance = T, nfolds = 10)
+confusionMatrix(as.factor(res[[1]]), as.factor(testData$y))
+confusionMatrix(as.factor(res[[2]]), as.factor(testData$y))
 
 # Regression
 
@@ -58,6 +62,10 @@ lambda = 0.1
 x = model.matrix(y ~ ., data = trainData)[, -1]
 y = trainData$y
 
+res = ensemble(x, y, testData = testData, models = c("linear", "svm"), bagging = F, responseVariable = "y", R = 10, ignoreWarnings = T, importance = T, nfolds = 10)
+rmse(res[[1]], testData$y)
+rmse(res[[2]], testData$y)
+
+
 # res = bagging(x, y, responseVariable = "y", testData = testData, model_type = "lasso", R = 20, ignoreWarnings = T, importance = T)
 # res = bagging(x, y, responseVariable = "y", testData = testData, model_type = "elastic_net", R = 20, ignoreWarnings = T, importance = T)
-res = bagging(x, y, responseVariable = "y", testData = testData, model_type = "ridge", R = 20, ignoreWarnings = T, importance = T)

@@ -1,10 +1,16 @@
-predict_regression <- function(coefficients, newdata) {
+predict_regression <- function(coefficients, newdata, fit= NULL) {
+
+    if(!is.null(fit) && ((is.data.frame(newdata) && length(colnames(newdata)) == 1) || is.numeric(newdata))){
+        # predictions = predict(coefficients, newdata)
+        predictions <- predict(fit, newdata)
+        predictions <- as.vector(predictions)
+        return(predictions)
+    }
 
     # Check if coefficients is a matrix
     if (is.data.frame(coefficients)) {
         coefficients <- as.matrix(coefficients)
     }
-
 
     # Add a column of ones for the intercept term if not present
     if (ncol(newdata) + 1 == nrow(coefficients)) {

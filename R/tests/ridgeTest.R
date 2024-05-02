@@ -44,7 +44,7 @@ x = as.matrix(subset(trainData, select = -y))
 y = trainData$y
 
 model = ridge_regression(x, y, importance = TRUE, type = "class")
-testSet = preprocessTestData(subset(testData, select = -y), intercept = FALSE)
+testSet = preprocessTestData(subset(testData, select = -y), intercept = TRUE)
 
 predictions = predict(model$fit, testSet, type = "class")
 head(predictions)

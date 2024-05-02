@@ -1,5 +1,5 @@
-crossValidation = function(x, y, alpha = 1, lambda = NULL, nfolds = 10, type = "default"){
-    if (!is.numeric(alpha)) {
+crossValidation = function(x, y, alpha = NULL, lambda = NULL, nfolds = 10, type = "default"){
+    if (!is.null(alpha) && !is.numeric(alpha)) {
         stop("alpha parameter must be a numeric value")
     }
     if (!is.null(lambda) && !is.numeric(lambda)) {
@@ -14,6 +14,9 @@ crossValidation = function(x, y, alpha = 1, lambda = NULL, nfolds = 10, type = "
     # Convert target to factor for multinomial classification
     if ( type == "class" & length(unique(y)) >= 2) {
         y <- as.factor(y)
+    }
+    if(is.null(alpha)){
+        alpha = sample(seq(0.1, 0.9, by = 0.1), 1)
     }
     # print(class(x))
     # print(head(x))
@@ -40,6 +43,8 @@ crossValidation = function(x, y, alpha = 1, lambda = NULL, nfolds = 10, type = "
     }
     else{
         coefficients = as.matrix(coef(fit, s = "lambda.min"))
+        print("coefficients==========")
+        print(coefficients)
         coefficients_sum <- Reduce(`+`, coefficients)
         coefficients_matrix <- as.matrix(coefficients_sum)[-1, , drop=FALSE]
         selected_vars <- which(sapply(coefficients_matrix, function(x) x != 0))
@@ -47,6 +52,7 @@ crossValidation = function(x, y, alpha = 1, lambda = NULL, nfolds = 10, type = "
         selectedFeatures <- names(coefficients_matrix[selected_vars, ])
 
     }
+    print(coef(fit))
     cat("Most Informative Predictors: \n", selectedFeatures)
     return(list(fit = fit, bestLambda = best_lambda, features = selectedFeatures, alpha = alpha, nfolds = nfolds, type = type))
 }

@@ -1,7 +1,7 @@
 library(glmnet)
 
-elastic_net_regression <- function(x, y, alpha = 0.5, lambda = NULL, importance = FALSE, type = "default", nfolds = 5, ignoreWarnings = T) {
-    if (!is.numeric(alpha)) {
+elastic_net_regression <- function(x, y, alpha = NULL, lambda = NULL, importance = FALSE, type = "default", nfolds = 5, ignoreWarnings = T) {
+    if (!is.null(alpha) && !is.numeric(alpha)) {
         stop("alpha parameter must be a numeric value")
     }
     if (!is.null(lambda) && !is.numeric(lambda)) {
@@ -28,10 +28,11 @@ elastic_net_regression <- function(x, y, alpha = 0.5, lambda = NULL, importance 
     }
 
     if(importance){
-        cv.fit = crossValidation(x, y, alpha = alpha, type = type, nfolds = nfolds)
+        cv.fit = crossValidation(x, y, type = type, nfolds = nfolds)
         print(cv.fit)
         x = x[, cv.fit$features]
         lambda = cv.fit$bestLambda
+        alpha = cv.fit$alpha
     }
 
     if (is.null(lambda)) {
@@ -40,6 +41,12 @@ elastic_net_regression <- function(x, y, alpha = 0.5, lambda = NULL, importance 
             warning("Please provide lambda. Setting lambda to default value 0.01")
         }
     }
+    # if (is.null(alpha)) {
+    #     alpha <- 0.5
+    #     if(!ignoreWarnings){
+    #         warning("Please provide alpha for elastic_net regression. Setting alpha to default value 0.5")
+    #     }
+    # }
     if(type == "class"){
         if (length(unique(y)) == 2) {
             # Binary classification
