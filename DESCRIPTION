@@ -11,4 +11,5 @@ Encoding: UTF-8
 LazyData: true
 Depends:
     glmnet (>= 4.1),
-    e1071 (>= 1.7)
+    e1071 (>= 1.7),
+    randomForest (>= 1.7),

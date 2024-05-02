@@ -1,6 +1,6 @@
 library(glmnet)
 
-linear_regression <- function(x, y, alpha = 1, lambda = NULL, importance = FALSE, type = "default", nfolds = 10, ignoreWarnings = T) {
+linear_regression <- function(x, y, alpha = 1, lambda = NULL, importance = FALSE, type = "default", nfolds = 10, ignoreWarnings = T, k = 6) {
     if (!is.numeric(alpha)) {
         stop("alpha parameter must be a numeric value")
     }
@@ -23,6 +23,13 @@ linear_regression <- function(x, y, alpha = 1, lambda = NULL, importance = FALSE
         x = data.frame(x)
     }
 
+    if(importance && !is.numeric(k)){
+        stop("parameter 'k' must be of type numeric")
+    }
+    if(!is.null(k) && k<1){
+        stop("parameter 'k' must be >= 1.")
+    }
+
     if(length(colnames(x)) == 1){
         data = data.frame(x, y)
         fit = lm(y ~ x, data = data)
@@ -36,10 +43,11 @@ linear_regression <- function(x, y, alpha = 1, lambda = NULL, importance = FALSE
 
 
     if(importance){
-        cv.fit = crossValidation(x, y, alpha = alpha, type = type, nfolds = nfolds)
-        print(cv.fit)
-        x = x[, cv.fit$features]
-        lambda = cv.fit$bestLambda
+        # cv.fit = crossValidation(x, y, alpha = alpha, type = type, nfolds = nfolds)
+        # print(cv.fit)
+        selected_vars = getKImportantPredictors(x, y, type = "default", k = k )
+        x = x[, selected_vars]
+        # lambda = cv.fit$bestLambda
     }
 
     if (is.null(lambda)) {

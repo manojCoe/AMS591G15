@@ -1,3 +1,24 @@
+library(randomForest)
+
+getKImportantPredictors = function(x, y, type = "default", k = 6){
+    # Train the Random Forest model
+    rf_model <- randomForest(x = x, y = y, ntree = 500, importance = TRUE)
+
+    # Get feature importance
+    if(type == "class"){
+        importanceScores <- rf_model$importance[, "MeanDecreaseAccuracy"]
+    }
+    else{
+        importanceScores <- rf_model$importance[, "%IncMSE"]
+    }
+
+    # Select the top features
+    # top_features <- rownames(importance_scores)[order(importance_scores, decreasing = TRUE)][1:5]
+    topFeatures <- names(importanceScores)[order(importanceScores, decreasing = TRUE)][1:k]
+    topFeatures = topFeatures[!is.na(topFeatures)]
+    return(topFeatures)
+}
+
 convertCatToNumeric = function(x, intercept = TRUE, toDataFrame = FALSE){
     # print("Inside convertCatToNumeric()")
     categoricalColumns = sapply(x, is.character)
