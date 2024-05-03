@@ -2,10 +2,9 @@ Package: AMS591G15
 Type: Package
 Title: Ensemble Learning and Bagging for Regression and Classification in R
 Version: 0.1.0
-Author: Who wrote it
+Author: Manoj Praveen Nandigama, Gunjan Prasad Deshpande,  Srinivasa Phani Madhav Marupudi, Praveen Anand
 Maintainer: The package maintainer <yourself@somewhere.net>
-Description: More about what it does (maybe more than one line)
-    Use four spaces when indenting paragraphs within the Description.
+Description: This R package provides a comprehensive toolkit for performing regression and classification tasks. It takes as input a response variable y and a matrix of candidate predictors/independent variables X, where each column represents a predictor. The package is designed to handle both binary and continuous response variables, with the predictors X being combinations of continuous, discrete, and binary variables. It is capable of handling scenarios where the number of predictors (p) is much larger than the sample size (n). The package implements various models including linear regression, logistic regression, ridge regression, lasso regression, and elastic net regression. Additionally, it offers the option to choose between support vector machine, random forest, or boosted trees for another machine learning model. The package allows users to pre-screen for the top K most informative predictors when p >> n, and it describes the methodology used for selecting these predictors. To improve model robustness, the package provides an option for "bagging" for linear, logistic, ridge, lasso, and elastic net models. It performs sampling with replacement R times and returns the final predicted values as the averages of these bagged models. It also computes a "naive" variable importance score based on the number of times each variable is selected in the bagging process. Additionally, the package offers the option for "ensemble" learning, where multiple models can be fitted on the same dataset. The final result is combined based on a specified methodology described in the package vignette.
 License: What license is it under?
 Encoding: UTF-8
 LazyData: true

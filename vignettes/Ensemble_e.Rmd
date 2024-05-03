@@ -1,80 +1,33 @@
-#'
-#' Ensemble Model
-#'
-#' Fits an ensemble model using a combination of different base models.
-#'
-#' @param x Predictor variables as a data frame or matrix.
-#' @param y Response variable as a vector.
-#' @param testData Test data for prediction.
-#' @param responseVariable Name of the response variable in the testData.
-#' @param models List of base models to be included in the ensemble.
-#' @param alpha Regularization parameter for certain models.
-#' @param lambda Regularization parameter for certain models.
-#' @param bagging Logical indicating whether to use bagging for model combination.
-#' @param R Number of bootstrap replicates if bagging is used.
-#' @param importance Logical indicating whether to consider feature importance in model selection.
-#' @param type Type of model, either "default" for regression or "class" for classification.
-#' @param nfolds Number of folds for cross-validation.
-#' @param ignoreWarnings Logical indicating whether to ignore warnings.
-#' @param kernel Kernel type for SVM models.
-#' @param cost Cost parameter for SVM models.
-#' @param degree Degree of polynomial kernel for SVM models.
-#' @param coef0 Intercept in polynomial kernel for SVM models.
-#' @param gamma Kernel coefficient for "radial", "polynomial", and "sigmoid" kernels for SVM models.
-#' @param epsilon Tolerance parameter for SVM models.
-#' @param k Number of important predictors to select.
-#'
-#' @return A list containing the ensemble predictions and, if applicable, evaluation metrics.
-#'
-#' @export
-#'
-#' @examples
-#' # ENSEMBLE
+---
+title: "Introduction to Ensemble"
+output: rmarkdown::html_vignette
+vignette: >
+  %\VignetteIndexEntry{Introduction to Ensemble}
+  %\VignetteEngine{knitr::rmarkdown}
+  %\VignetteEncoding{UTF-8}
+---
 
-#'# Binomial
-#'x <- matrix(rnorm(10000), ncol = 10)
-#'y <- factor(sample(0:1, 1000, replace = TRUE))
-#'data = data.frame(x, y)
+```{r, include = FALSE}
+knitr::opts_chunk$set(
+  collapse = TRUE,
+  comment = "#>"
+)
+```
 
-#'trainID <- sample(1:nrow(data), round(0.75 * nrow(data)))
-#'trainData <- data[trainID, ]
-#'testData <- data[-trainID, ]
-#'# model_bagged <- ensemble(subset(trainData, select = -y), trainData$y, testData = testData, models = c("logistic","svm","ridge","elastic_net"), responseVariable = "y", R = 15, type = "class", importance = F, lambda = 0.1)
-#'model_bagged <- ensemble(subset(trainData, select = -y), trainData$y, testData = testData, models = c("logistic","svm","ridge","elastic_net"), responseVariable = "y", R = 15, type = "class", importance = T, k = 6)
-#'model_bagged
-
-#'# Multinomial Classification
-
-#'x <- matrix(rnorm(1500), ncol = 15)
-#'y <- factor(sample(1:3, 100, replace = TRUE))
-
-#'data = data.frame(x, y)
-
-#'trainID <- sample(1:nrow(data), round(0.75 * nrow(data)))
-#'trainData <- data[trainID, ]
-#'testData <- data[-trainID, ]
-#'model_bagged <- ensemble(subset(trainData, select = -y), trainData$y, testData = testData, models = c("logistic","svm","ridge","elastic_net"), responseVariable = "y", R = 15, type = "class", importance = T, k = 6)
-#'model_bagged
-
-#'# Regression
-#'x <- matrix(rnorm(1000), ncol = 10)
-#'y <- rnorm(100)
-#'data = data.frame(x, y)
-
-#'trainID <- sample(1:nrow(data), round(0.75 * nrow(data)))
-#'trainData <- data[trainID, ]
-#'testData <- data[-trainID, ]
-#'model_bagged <- ensemble(subset(trainData, select = -y), trainData$y, testData = testData, models = c("svm","ridge","elastic_net"), responseVariable = "y", R = 15, importance = F)
-#'model_bagged
-
-#'model = lm(y ~ ., data = trainData)
-#'# preds = coef(model) %*% as.matrix(subset(testData, select = -y))
-#'test_x = subset(testData, select = -y)
-#'preds1 = predict(model, test_x)
-
-#'rmse(preds1, testData$y)
+```{r setup}
+library(AMS591G15)
+```
 
 
+-------------------------------------------------------------------------------------
+Introduction to Ensemble:
+-------------------------------------------------------------------------------------
+
+Ensemble learning is a machine learning technique that involves combining multiple models to improve the overall performance and robustness of a predictive model. Instead of relying on a single model, ensemble methods leverage the collective wisdom of multiple models to make more accurate predictions or classifications.
+
+```{}
+
+This code defines an R function called ensemble that implements an ensemble model. The function takes various parameters including predictor variables (x), response variable (y), test data (testData), type of model (type), number of folds for cross-validation (nfolds), and others.
 
 
 ensemble <- function(x, y, testData, responseVariable = NULL, models,
@@ -82,7 +35,14 @@ ensemble <- function(x, y, testData, responseVariable = NULL, models,
                      importance = FALSE, type = "default", nfolds = 10,
                      ignoreWarnings = T, kernel = "radial",cost = 1,
                      degree = 3, coef0 = 0, gamma = NULL,epsilon = 0.1, k = 6
-                     ){
+                     )
+                     
+                     Function Definition:
+ensemble <- function(...): Defines the function named "ensemble" with multiple parameters.
+{
+```
+
+```{}
     if(!is.data.frame(x) && !is.matrix(x)){
         print(class(x))
         stop("x should be of type data.frame or matrix")
@@ -93,6 +53,20 @@ ensemble <- function(x, y, testData, responseVariable = NULL, models,
     # if(is.numeric(y) && type == "class"){
     #     stop("class has 1 or 0 observations; not allowed for regression model")
     # }
+    
+    ```
+    
+## Parameter Validation:
+Checks if input x is either a data frame or a matrix. If not, it raises an error.
+Validates the type of input y as a data frame, matrix, factor, or numeric. Raises an error if it's not.
+Ensures testData is either a data frame or a matrix, raising an error if not.
+Validates that responseVariable is a string, throwing an error if it's not.
+Validates the type of parameters alpha, R, lambda, type, ignoreWarnings, kernel, epsilon, cost, coef0, degree, and k. Throws errors for invalid types.
+Ensures that kernel is one of "linear", "radial", "polynomial", or "sigmoid". Raises an error if not.
+Checks that k is numeric and greater than or equal to 1.
+
+
+```{}
     if(!is.data.frame(testData) && !is.matrix(testData)){
         if(is.null(testData)){
             stop("Missing attribute 'testData'")
@@ -103,6 +77,17 @@ ensemble <- function(x, y, testData, responseVariable = NULL, models,
         stop("parameter 'responseVariable' should be a string.")
     }
     # if( !(model_type %in% c("linear", "logistic", "ridge", "lasso", "elastic_net", "svm")) ){
+    ```
+    
+    
+    
+## Model Training:
+Depending on the models specified, it trains each model (linear, logistic, ridge, lasso, elastic_net, or svm) using corresponding functions (linear_regression, logistic_regression, ridge_regression, lasso_regression, elastic_net_regression, or svmModel) with specified parameters.
+Predictions are made based on the trained models.
+
+
+```{}
+
     #     stop("Please provide a valid model_type: ('linear', 'logistic', 'ridge', 'lasso', 'elastic_net', 'svm')")
     # }
     if (!is.null(alpha) && !is.numeric(alpha)) {
@@ -119,6 +104,8 @@ ensemble <- function(x, y, testData, responseVariable = NULL, models,
     }
     if(!is.logical(ignoreWarnings)){
         stop("parameter 'ignoreWarnings' must be of type logical TRUE/FALSE")
+        
+```
     }
     if(!is.null(kernel) && !(kernel %in% c("linear", "radial", "polynomial", "sigmoid")) ){
         stop("Please provide a valid kernel type: ('linear', 'radial', 'polynomial', 'sigmoid')")
@@ -176,6 +163,16 @@ ensemble <- function(x, y, testData, responseVariable = NULL, models,
                 testSet = preprocessTestData(subset(testData, select = -which(names(testData) == responseVariable)), intercept = TRUE)
 
                 print(model$selectedFeatures)
+                
+## Ensemble Techniques:
+If bagging is enabled, it performs bagging by iterating over the models and combining their predictions.
+If bagging is not enabled, it calculates the weighted average of predictions from different models.
+                
+                
+```{}
+
+
+                
 
                 test_x = as.matrix(testSet[, model$selectedFeatures])
 
@@ -192,6 +189,12 @@ ensemble <- function(x, y, testData, responseVariable = NULL, models,
                 prediction_bagging[[length(prediction_bagging) + 1]] <- preds
 
             } else if (i == "ridge") {
+```
+
+
+```{}
+
+
 
                 model <- ridge_regression(x, y, alpha = 0, lambda = lambda, importance = importance, type = type, nfolds = nfolds, ignoreWarnings = ignoreWarnings, k = k)
                 selected_vars = model$selectedFeatures
@@ -338,3 +341,26 @@ ensemble <- function(x, y, testData, responseVariable = NULL, models,
     }
 
 }
+
+
+```
+
+## Output:
+For regression tasks, it calculates the root mean squared error (RMSE) and returns the final predictions along with other relevant information.
+For classification tasks, it applies a majority vote to get the final predictions and returns them along with accuracy and other results.
+
+
+## Key points:
+
+1] Parameters: The function accepts several parameters such as x (predictor variables), y (response variable), testData (test data for prediction), models (list of base models), alpha (regularization parameter), lambda (regularization parameter), bagging (logical indicating whether to use bagging for model combination), R (number of bootstrap replicates if bagging is used), importance (logical indicating whether to consider feature importance in model selection), type (type of model, either "default" for regression or "class" for classification), and many others.
+
+
+2] Model Building: The function builds various base models based on the specified algorithms (e.g., linear regression, logistic regression, ridge regression, lasso regression, elastic net regression, SVM) using the provided training data (x and y).
+Bagging: If bagging is enabled, the function performs bagging by fitting each base model to multiple bootstrap samples of the training data and then aggregates their predictions.
+
+
+3]Model Evaluation: For regression models, it computes the Root Mean Squared Error (RMSE) for each model's predictions on the test data. It then calculates the weighted average of predictions based on the inverse of the RMSE values as weights. For classification models, it computes the accuracy of each model's predictions and performs a majority vote to determine the final predicted class.
+
+
+4]Output: The function returns a list containing ensemble predictions and, if applicable, evaluation metrics such as RMSE for regression or accuracy for classification.
+Overall, this function provides a flexible framework for building ensemble models using a combination of different base models and allows for easy experimentation with various algorithms and parameters.

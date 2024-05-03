@@ -120,15 +120,6 @@ return(result):
 ```
 Returns the result.
 
-## Sample Data: 
-
-```{r}
-set.seed(123)
-x2 <- rnorm(100)
-y <- 2 * x2 + rnorm(100)
-df <- data.frame(x2, y)
-
-```
 
 
 ---------------------------------------------------------------------------------
@@ -330,16 +321,8 @@ return(result):
 Returns the result.
 
 
-## Sample Data
-
-```{r}
-set.seed(123)
-x <- matrix(rnorm(100 * 10), ncol = 10)
-y <- 2 * rowSums(x[, 1:5]) + rnorm(100)
-df <- data.frame(x, y)
 
 
-```
 
 
 
@@ -442,17 +425,6 @@ return(result):
 Returns the result.
 
 
-## Sample Data:
-
-
-```{r}
-set.seed(123)
-x <- matrix(rnorm(100 * 10), ncol = 10)
-y <- 2 * rowSums(x[, 1:5]) + rnorm(100)
-df <- data.frame(x, y)
-
-
-```
 
 
 
@@ -571,15 +543,6 @@ Returns the result.
 
 
 
-## Sample Data
-
-```{r}
-set.seed(123)
-x <- matrix(rnorm(100 * 10), ncol = 10)
-y <- 2 * rowSums(x[, 1:5]) + rnorm(100)
-df <- data.frame(x, y)
-
-```
 
 -------------------------------------------------------------------------------
 **Prediction Regression**

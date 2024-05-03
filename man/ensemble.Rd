@@ -83,8 +83,8 @@ data = data.frame(x, y)
 trainID <- sample(1:nrow(data), round(0.75 * nrow(data)))
 trainData <- data[trainID, ]
 testData <- data[-trainID, ]
-model_bagged <- ensemble(subset(trainData, select = -y), trainData$y, testData = testData, models = c("logistic","svm","ridge","elastic_net"), responseVariable = "y", R = 15, type = "class", importance = F, lambda = 0.1)
-# model_bagged <- ensemble(subset(trainData, select = -y), trainData$y, testData = testData, models = c("logistic","svm","ridge","elastic_net"), responseVariable = "y", R = 15, type = "class", importance = T, k = 6)
+# model_bagged <- ensemble(subset(trainData, select = -y), trainData$y, testData = testData, models = c("logistic","svm","ridge","elastic_net"), responseVariable = "y", R = 15, type = "class", importance = F, lambda = 0.1)
+model_bagged <- ensemble(subset(trainData, select = -y), trainData$y, testData = testData, models = c("logistic","svm","ridge","elastic_net"), responseVariable = "y", R = 15, type = "class", importance = T, k = 6)
 model_bagged
 # Multinomial Classification
 x <- matrix(rnorm(1500), ncol = 15)
@@ -104,4 +104,9 @@ trainData <- data[trainID, ]
 testData <- data[-trainID, ]
 model_bagged <- ensemble(subset(trainData, select = -y), trainData$y, testData = testData, models = c("svm","ridge","elastic_net"), responseVariable = "y", R = 15, importance = F)
 model_bagged
+model = lm(y ~ ., data = trainData)
+# preds = coef(model) \%*\% as.matrix(subset(testData, select = -y))
+test_x = subset(testData, select = -y)
+preds1 = predict(model, test_x)
+rmse(preds1, testData$y)
 }

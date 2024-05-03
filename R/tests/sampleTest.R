@@ -98,8 +98,8 @@ data = data.frame(x, y)
 trainID <- sample(1:nrow(data), round(0.75 * nrow(data)))
 trainData <- data[trainID, ]
 testData <- data[-trainID, ]
-model_bagged <- ensemble(subset(trainData, select = -y), trainData$y, testData = testData, models = c("logistic","svm","ridge","elastic_net"), responseVariable = "y", R = 15, type = "class", importance = F, lambda = 0.1)
-# model_bagged <- ensemble(subset(trainData, select = -y), trainData$y, testData = testData, models = c("logistic","svm","ridge","elastic_net"), responseVariable = "y", R = 15, type = "class", importance = T, k = 6)
+# model_bagged <- ensemble(subset(trainData, select = -y), trainData$y, testData = testData, models = c("logistic","svm","ridge","elastic_net"), responseVariable = "y", R = 15, type = "class", importance = F, lambda = 0.1)
+model_bagged <- ensemble(subset(trainData, select = -y), trainData$y, testData = testData, models = c("logistic","svm","ridge","elastic_net"), responseVariable = "y", R = 15, type = "class", importance = T, k = 6)
 model_bagged
 
 # Multinomial Classification
