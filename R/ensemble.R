@@ -199,6 +199,16 @@ ensemble <- function(x, y, testData, responseVariable = NULL, models,
         print(dimensions)
 
         combined_matrix <- do.call(rbind, prediction_matrices)
+        combined_col_matrix <- do.call(cbind, prediction_bagging)
+        mses = apply(combined_col_matrix, 2, function(x){
+            rmse(x, testData[[responseVariable]])
+        })
+
+        weights <- 1 / mses
+        weights <- weights / sum(weights)
+
+        # Calculate weighted average
+        weightedPredictions <- rowSums(combined_col_matrix * weights)
 
         # Step 5: Calculate row means
         final_predicted_values <- rowMeans(combined_matrix)
@@ -207,11 +217,15 @@ ensemble <- function(x, y, testData, responseVariable = NULL, models,
         # if(is.null(coefficients)){
         #     coefficients = coef(model)
         # }
-        return(list(predictions = final_predicted_values, rmse = rmse_score))
+        return(list(predictions = final_predicted_values, weightedPredictions = weightedPredictions, modelMses = mses, rmse = rmse_score))
     }
     else{
         print("Majority Vote")
         combined_matrix <- do.call(cbind, prediction_bagging)
+        modelAccuracies = apply(combined_matrix, 2, function(x){
+            getAccuracyForClassification(x, testData[[responseVariable]])
+        })
+        weightedPredictions = getWeightedAverage(modelAccuracies, combined_matrix, testData[[responseVariable]])
         if(!is.numeric(combined_matrix)){
 
             # for (i in 1:ncol(combined_matrix)) {
@@ -220,7 +234,7 @@ ensemble <- function(x, y, testData, responseVariable = NULL, models,
 
             # Apply the function to get the final predictions
             final_predicted_values <- apply(combined_matrix, 1, function(x) {
-                names(which.max(table(x)))
+                as.character(names(which.max(table(x))))
             })
             # class_levels <- levels(y)
             # # Convert numerical labels to character labels using class levels
@@ -231,12 +245,17 @@ ensemble <- function(x, y, testData, responseVariable = NULL, models,
 
             # Apply the function to get the final predictions
             final_predicted_values <- apply(combined_matrix, 1, function(x) {
-                names(which.max(table(x)))
+                as.character(names(which.max(table(x))))
             })
         }
+        final_predicted_values = as.character(final_predicted_values)
         # Convert matrix elements from character to numeric
 
-        return(list(predictions = final_predicted_values, results = table(final_predicted_values, testData[[responseVariable]])))
+        return(list(predictions = final_predicted_values,
+                    accuracy = as.numeric(modelAccuracies),
+                    results = table(final_predicted_values,testData[[responseVariable]]),
+                    weightedPredictions = weightedPredictions
+                    ))
     }
 
 }

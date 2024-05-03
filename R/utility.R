@@ -91,3 +91,41 @@ getInformativePredictors = function(model){
     selectedPredictors = names(which(coefficients != 0))
     return(selectedPredictors)
 }
+
+getAccuracyForClassification = function(preds, act){
+    res = mean(preds == act)
+    return(res)
+}
+
+getWeightedAverage = function(accuracies, all_predictions, act){
+    actual_labels = levels(act)
+    if (length(unique(actual_labels)) == 2) {
+        weights <- 1 / accuracies
+    } else {
+        exp_accuracies <- exp(accuracies)
+        weights <- exp_accuracies / sum(exp_accuracies)
+    }
+
+    # Rank models based on accuracy
+    # rank <- rank(-accuracies)  # Use negative sign for descending order
+    #
+    # # Calculate weights based on rank
+    # weights <- 1 / rank
+    # weights <- weights / sum(weights)
+
+    # Calculate weighted average
+    final_predictions <- apply(all_predictions, 1, function(row) sum(row == unique(actual_labels)) / length(unique(actual_labels)))
+
+    # Convert to final class labels
+    if (length(unique(actual_labels)) == 2) {
+        final_predictions <- ifelse(final_predictions >= 0.5, unique(actual_labels)[1], unique(actual_labels)[2])
+    } else {
+        final_predictions <- sapply(1:length(final_predictions), function(i) {
+            class_probs <- table(all_predictions[i, ])
+            names(class_probs)[which.max(class_probs)]
+        })
+    }
+    final_predictions = as.character(final_predictions)
+    return(final_predictions)
+
+}
