@@ -13,9 +13,10 @@ x = model.matrix(Species ~ ., data = trainData)[, -1]
 y = trainData$Species
 
 
-res = ensemble(x, y, testData = testData, models = c("logistic", "elastic_net"), bagging = T, responseVariable = "Species", R = 10, type = "class", ignoreWarnings = F, importance = F, nfolds = 10)
-confusionMatrix(as.factor(res[[1]]), testData$Species)
-confusionMatrix(as.factor(res[[2]]), testData$Species)
+res = ensemble(x, y, testData = testData, models = c("logistic", "elastic_net"), bagging = T, responseVariable = "Species", R = 10, type = "class", ignoreWarnings = F, importance = F, nfolds = 10, lambda = 0.1)
+res
+# confusionMatrix(as.factor(res[[1]]), testData$Species)
+# confusionMatrix(as.factor(res[[2]]), testData$Species)
 
 # data = data.frame(x, y)
 # y = as.factor(y)
@@ -42,10 +43,14 @@ head(trainData)
 x = as.matrix(subset(trainData, select = -y))
 y = as.factor(trainData$y)
 
-res = ensemble(x, y, testData = testData, models = c("logistic", "svm"), bagging = F, responseVariable = "y", R = 10, type = "class", ignoreWarnings = T, importance = T, nfolds = 10)
-confusionMatrix(as.factor(res[[1]]), as.factor(testData$y))
-confusionMatrix(as.factor(res[[2]]), as.factor(testData$y))
+res = ensemble(x, y, testData = testData, models = c("logistic", "svm", "lasso"), bagging = F, responseVariable = "y", R = 10, type = "class", ignoreWarnings = T, importance = T, nfolds = 10)
+confusionMatrix(as.factor(res$predictions), as.factor(testData$y))
+# confusionMatrix(as.factor(res[[2]]), as.factor(testData$y))
+res
 
+actModel = glmnet(x, y, family = "binomial")
+testSet = preprocessTestData(subset(testData, select = -y), intercept = FALSE)
+preds = predict(actModel, testSet, type = "class")
 # Regression
 
 PATH = "C:/Users/MSP/Downloads/Mystery.csv"
@@ -63,8 +68,7 @@ x = model.matrix(y ~ ., data = trainData)[, -1]
 y = trainData$y
 
 res = ensemble(x, y, testData = testData, models = c("linear", "svm"), bagging = F, responseVariable = "y", R = 10, ignoreWarnings = T, importance = T, nfolds = 10)
-rmse(res[[1]], testData$y)
-rmse(res[[2]], testData$y)
+res
 
 
 # res = bagging(x, y, responseVariable = "y", testData = testData, model_type = "lasso", R = 20, ignoreWarnings = T, importance = T)

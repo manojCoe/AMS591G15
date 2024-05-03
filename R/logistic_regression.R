@@ -1,7 +1,7 @@
 library(glmnet)
 
-logistic_regression <- function(x, y, alpha = alpha, lambda = NULL, importance = FALSE, type = "default", nfolds = 10, ignoreWarnings = T) {
-    if (!is.numeric(alpha)) {
+logistic_regression <- function(x, y, alpha = alpha, lambda = NULL, importance = FALSE, type = "default", nfolds = 10, ignoreWarnings = T, k = 6) {
+    if (!is.null(alpha) && !is.numeric(alpha)) {
         stop("alpha parameter must be a numeric value")
     }
     if (!is.null(lambda) && !is.numeric(lambda)) {
@@ -19,6 +19,17 @@ logistic_regression <- function(x, y, alpha = alpha, lambda = NULL, importance =
     if(!is.numeric(nfolds)){
         stop("parameter 'nfolds' must be of type numeric.")
     }
+    if(importance && !is.numeric(k)){
+        stop("parameter 'k' must be of type numeric")
+    }
+    if(!is.null(k)){
+        if(!is.numeric(k)){
+            stop("parameter 'k' must be of type numeric")
+        }
+        else if ( k < 1){
+            stop("parameter 'k' must be >= 1.")
+        }
+    }
     if(is.matrix(x)){
         x = data.frame(x)
     }
@@ -29,10 +40,12 @@ logistic_regression <- function(x, y, alpha = alpha, lambda = NULL, importance =
     y = as.factor(y)
 
     if(importance){
-        cv.fit = crossValidation(x, y, alpha = alpha, type = "class", nfolds = nfolds)
-        print(cv.fit)
-        x = x[, cv.fit$features]
-        lambda = cv.fit$bestLambda
+        # cv.fit = crossValidation(x, y, alpha = alpha, type = "class", nfolds = nfolds)
+        # print(cv.fit)
+        # x = x[, cv.fit$features]
+        # lambda = cv.fit$bestLambda
+        selected_vars = getKImportantPredictors(x, y, type = type, k = k )
+        x = x[, selected_vars]
     }
 
     if (is.null(lambda)) {

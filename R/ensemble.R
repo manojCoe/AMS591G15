@@ -2,7 +2,8 @@ ensemble <- function(x, y, testData, responseVariable = NULL, models,
                      alpha = NULL, lambda = NULL, bagging = FALSE, R = 10,
                      importance = FALSE, type = "default", nfolds = 10,
                      ignoreWarnings = T, kernel = "radial",cost = 1,
-                     degree = 3, coef0 = 0, gamma = NULL,epsilon = 0.1){
+                     degree = 3, coef0 = 0, gamma = NULL,epsilon = 0.1, k = 6
+                     ){
     if(!is.data.frame(x) && !is.matrix(x)){
         print(class(x))
         stop("x should be of type data.frame or matrix")
@@ -55,7 +56,16 @@ ensemble <- function(x, y, testData, responseVariable = NULL, models,
     if(!is.null(degree) &&!is.numeric(degree)){
         stop("degree parameter accepts only 'numeric' type values ")
     }
+    if(!is.null(k)){
+        if(!is.numeric(k)){
+            stop("parameter 'k' must be of type numeric")
+        }
+        else if ( k < 1){
+            stop("parameter 'k' must be >= 1.")
+        }
 
+
+    }
     # if(model_type == "elastic_net" && is.null(alpha)){
     #     alpha = 0.5
     #     if(!ignoreWarnings){
@@ -66,16 +76,24 @@ ensemble <- function(x, y, testData, responseVariable = NULL, models,
     prediction_bagging <- list()
     if (bagging == TRUE){
         for (i in models){
-            baggingResult = bagging(x, y, testData = testData, responseVariable = responseVariable, model_type = i, R = R, type = type, importance = importance, ignoreWarnings = ignoreWarnings, nfolds = nfolds)
+            baggingResult = bagging(x, y, testData = testData,
+                                    responseVariable = responseVariable,
+                                    model_type = i, R = R, type = type,
+                                    importance = importance, ignoreWarnings = ignoreWarnings,
+                                    nfolds = nfolds, lambda = lambda, alpha = alpha,
+                                    kernel = kernel,cost = cost,
+                                    degree = degree, coef0 = coef0, gamma = gamma,
+                                    epsilon = epsilon, k = k
+                                    )
             predictions <- baggingResult$predictions
             prediction_bagging[[length(prediction_bagging) + 1]] <- predictions
         }
-        return(prediction_bagging)
+        # return(prediction_bagging)
 
     } else {
         for (i in models){
             if (i == "linear") {
-                model <- linear_regression(x, y, alpha = 1, lambda = lambda, importance = importance, nfolds = nfolds, ignoreWarnings = ignoreWarnings)
+                model <- linear_regression(x, y, alpha = 1, lambda = lambda, importance = importance, nfolds = nfolds, ignoreWarnings = ignoreWarnings, k = k)
                 testSet = preprocessTestData(subset(testData, select = -which(names(testData) == responseVariable)), intercept = TRUE)
 
                 print(model$selectedFeatures)
@@ -86,37 +104,44 @@ ensemble <- function(x, y, testData, responseVariable = NULL, models,
                 prediction_bagging[[length(prediction_bagging) + 1]] <- preds
             } else if (i == "logistic") {
 
-                model <- logistic_regression(x, y, alpha = 1, lambda = lambda, importance = importance, type = type, nfolds = nfolds, ignoreWarnings = ignoreWarnings)
+                model <- logistic_regression(x, y, alpha = 1, lambda = lambda, importance = importance, type = type, nfolds = nfolds, ignoreWarnings = ignoreWarnings, k = k)
                 selected_vars = model$selectedFeatures
                 testSet = preprocessTestData(subset(testData, select = -which(names(testData) == responseVariable)), intercept = FALSE, features = selected_vars)
                 preds <- predict(model$fit, testSet, type = "class")
+                print("LOGISTIC")
                 print(table(preds, testData[[responseVariable]]))
                 prediction_bagging[[length(prediction_bagging) + 1]] <- preds
 
             } else if (i == "ridge") {
 
-                model <- ridge_regression(x, y, alpha = 0, lambda = lambda, importance = importance, type = type, nfolds = nfolds, ignoreWarnings = ignoreWarnings)
+                model <- ridge_regression(x, y, alpha = 0, lambda = lambda, importance = importance, type = type, nfolds = nfolds, ignoreWarnings = ignoreWarnings, k = k)
+                selected_vars = model$selectedFeatures
                 if(type == "class"){
-                    testSet = preprocessTestData(subset(testData, select = -which(names(testData) == responseVariable)), intercept = FALSE)
+                    testSet = preprocessTestData(subset(testData, select = -which(names(testData) == responseVariable)), intercept = FALSE, features = selected_vars)
                     preds <- predict(model$fit, testSet, type = "class")
+                    print("RIDGE")
                     print(table(preds, testData[[responseVariable]]))
                 } else{
-                    testSet = preprocessTestData(subset(testData, select = -which(names(testData) == responseVariable)), intercept = TRUE)
-                    preds = predict_regression(model$coef, testSet)
+                    testSet = preprocessTestData(subset(testData, select = -which(names(testData) == responseVariable)), intercept = F, features = selected_vars)
+                    # preds = predict_regression(model$coef, testSet)
+                    preds = predict(model$fit, testSet)
                 }
                 # preds = predict_regression(model$coef, testSet)
                 prediction_bagging[[length(prediction_bagging) + 1]] <- preds
 
             } else if (i == "lasso") {
 
-                model <- lasso_regression(x, y, alpha = 1, lambda = lambda, importance = importance, type = type, nfolds = nfolds, ignoreWarnings = ignoreWarnings)
+                model <- lasso_regression(x, y, alpha = 1, lambda = lambda, importance = importance, type = type, nfolds = nfolds, ignoreWarnings = ignoreWarnings, k = k)
+                selected_vars = model$selectedFeatures
                 if(type == "class"){
-                    testSet = preprocessTestData(subset(testData, select = -which(names(testData) == responseVariable)), intercept = FALSE)
+                    testSet = preprocessTestData(subset(testData, select = -which(names(testData) == responseVariable)), intercept = FALSE, features = selected_vars)
                     preds <- predict(model$fit, testSet, type = "class")
+                    print("LASSO")
                     print(table(preds, testData[[responseVariable]]))
                 } else{
-                    testSet = preprocessTestData(subset(testData, select = -which(names(testData) == responseVariable)), intercept = TRUE)
-                    preds = predict_regression(model$coef, testSet)
+                    testSet = preprocessTestData(subset(testData, select = -which(names(testData) == responseVariable)), intercept = F, features = selected_vars)
+                    # preds = predict_regression(model$coef, testSet)
+                    preds = predict(model$fit, testSet)
                 }
                 prediction_bagging[[length(prediction_bagging) + 1]] <- preds
 
@@ -127,14 +152,18 @@ ensemble <- function(x, y, testData, responseVariable = NULL, models,
                         warning("Please provide alpha for elastic_net regression. Setting alpha to default value 0.5")
                     }
                 }
-                model <- elastic_net_regression(x, y, alpha = alpha, lambda = lambda, importance = importance, type = type, nfolds = nfolds, ignoreWarnings = ignoreWarnings)
+                model <- elastic_net_regression(x, y, alpha = alpha, lambda = lambda, importance = importance, type = type, nfolds = nfolds, ignoreWarnings = ignoreWarnings, k = k)
+                selected_vars = model$selectedFeatures
                 if(type == "class"){
-                    testSet = preprocessTestData(subset(testData, select = -which(names(testData) == responseVariable)), intercept = FALSE)
+                    testSet = preprocessTestData(subset(testData, select = -which(names(testData) == responseVariable)), intercept = FALSE, features = selected_vars)
                     preds <- predict(model$fit, testSet, type = "class")
+                    # preds = predict(model$fit, testSet)
+                    print("ELASTICNET")
                     print(table(preds, testData[[responseVariable]]))
                 } else{
-                    testSet = preprocessTestData(subset(testData, select = -which(names(testData) == responseVariable)), intercept = TRUE)
-                    preds = predict_regression(model$coef, testSet)
+                    testSet = preprocessTestData(subset(testData, select = -which(names(testData) == responseVariable)), intercept = F, features = selected_vars)
+                    # preds = predict_regression(model$coef, testSet)
+                    preds = predict(model$fit, testSet)
                 }
                 prediction_bagging[[length(prediction_bagging) + 1]] <- preds
             }
@@ -155,16 +184,59 @@ ensemble <- function(x, y, testData, responseVariable = NULL, models,
                 if(type == "class"){
                     preds <- predict(model$fit, test_x, type = "class")
                 } else{
-                    preds = predict(model$fit, test_x)
+                    preds = as.vector(predict(model$fit, test_x))
                 }
                 prediction_bagging[[length(prediction_bagging) + 1]] <- preds
             }
 
 
         }
-        return(prediction_bagging)
+    }
+    if(type != "class"){
+        prediction_matrices <- lapply(prediction_bagging, as.matrix)
+        # Step 2: Check dimensions of each matrix
+        dimensions <- sapply(prediction_matrices, dim)
+        print(dimensions)
 
+        combined_matrix <- do.call(rbind, prediction_matrices)
 
+        # Step 5: Calculate row means
+        final_predicted_values <- rowMeans(combined_matrix)
+        rmse_score = rmse(final_predicted_values, testData[[responseVariable]])
+
+        # if(is.null(coefficients)){
+        #     coefficients = coef(model)
+        # }
+        return(list(predictions = final_predicted_values, rmse = rmse_score))
+    }
+    else{
+        print("Majority Vote")
+        combined_matrix <- do.call(cbind, prediction_bagging)
+        if(!is.numeric(combined_matrix)){
+
+            # for (i in 1:ncol(combined_matrix)) {
+            #     combined_matrix[, i] <- factor(combined_matrix[, i])
+            # }
+
+            # Apply the function to get the final predictions
+            final_predicted_values <- apply(combined_matrix, 1, function(x) {
+                names(which.max(table(x)))
+            })
+            # class_levels <- levels(y)
+            # # Convert numerical labels to character labels using class levels
+            # final_predicted_values <- class_levels[final_predicted_values]
+        }
+        else{
+            combined_matrix <- matrix(as.numeric(unlist(combined_matrix)), nrow = nrow(prediction_bagging[[1]]))
+
+            # Apply the function to get the final predictions
+            final_predicted_values <- apply(combined_matrix, 1, function(x) {
+                names(which.max(table(x)))
+            })
+        }
+        # Convert matrix elements from character to numeric
+
+        return(list(predictions = final_predicted_values, results = table(final_predicted_values, testData[[responseVariable]])))
     }
 
 }

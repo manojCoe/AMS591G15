@@ -1,7 +1,11 @@
 library(glmnet)
 
-ridge_regression <- function(x, y, alpha = 1, lambda = NULL, importance = FALSE, type = "default", nfolds = 10, ignoreWarnings = T) {
-    if (!is.numeric(alpha)) {
+ridge_regression <- function(x, y, alpha = 0,
+                             lambda = NULL, importance = FALSE,
+                             type = "default", nfolds = 10,
+                             ignoreWarnings = T, k = 6
+                             ) {
+    if (!is.null(alpha) && !is.numeric(alpha)) {
         stop("alpha parameter must be a numeric value")
     }
     if (!is.null(lambda) && !is.numeric(lambda)) {
@@ -16,6 +20,15 @@ ridge_regression <- function(x, y, alpha = 1, lambda = NULL, importance = FALSE,
     if(!is.numeric(nfolds)){
         stop("parameter 'nfolds' must be of type numeric.")
     }
+    if(!is.null(k)){
+        if(!is.numeric(k)){
+            stop("parameter 'k' must be of type numeric")
+        }
+        else if ( k < 1){
+            stop("parameter 'k' must be >= 1.")
+        }
+    }
+
     if(is.matrix(x)){
         x = data.frame(x)
     }
@@ -27,11 +40,23 @@ ridge_regression <- function(x, y, alpha = 1, lambda = NULL, importance = FALSE,
         y <- as.factor(y)
     }
 
-    if(importance){
+    # if(importance){
+    #     cv.fit = crossValidation(x, y, alpha = alpha, type = type, nfolds = nfolds)
+    #     print(cv.fit)
+    #     x = x[, cv.fit$features]
+    #     lambda = cv.fit$bestLambda
+    # }
+    if(is.null(k) && importance){
+        warning("Please provide parameter 'k' for selecting k most informative predictors.
+                Defaulting to use cross validation to obtain important features.")
         cv.fit = crossValidation(x, y, alpha = alpha, type = type, nfolds = nfolds)
         print(cv.fit)
         x = x[, cv.fit$features]
         lambda = cv.fit$bestLambda
+    }
+    else{
+        selected_vars = getKImportantPredictors(x, y, type = type, k = k )
+        x = x[, selected_vars]
     }
 
     if (is.null(lambda)) {

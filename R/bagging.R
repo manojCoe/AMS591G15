@@ -7,7 +7,7 @@ bagging <- function(x, y, testData, model_type,
                     importance = NULL, nfolds = 10,
                     kernel = "radial",cost = 1,
                     degree = 3, coef0 = 0, gamma = NULL,
-                    epsilon = 0.1
+                    epsilon = 0.1, k = 6
                     ) {
     if(!is.data.frame(x) && !is.matrix(x) && !is.numeric(x)){
         print(class(x))
@@ -68,7 +68,7 @@ bagging <- function(x, y, testData, model_type,
         stop("degree parameter accepts only 'numeric' type values ")
     }
 
-    if(is.numeric(x)){
+    if(!is.data.frame(x) && !is.matrix(x) && is.numeric(x)){
         x = data.frame(x)
         colnames(x) = "x"
     }
@@ -101,6 +101,13 @@ bagging <- function(x, y, testData, model_type,
         importance = FALSE
     }
 
+    if(importance && !is.numeric(k)){
+        stop("parameter 'k' must be of type numeric")
+    }
+    if(!is.null(k) && k<1){
+        stop("parameter 'k' must be >= 1.")
+    }
+
 
     testSet = preprocessTestData(subset(testData, select = -which(names(testData) == responseVariable)), intercept = FALSE)
     print(paste("no:of rows in testData: ", nrow(testSet)))
@@ -130,7 +137,8 @@ bagging <- function(x, y, testData, model_type,
                                      importance = importance,
                                      type = type,
                                      ignoreWarnings = ignoreWarnings,
-                                     nfolds = nfolds
+                                     nfolds = nfolds, k = k,
+                                     lambda = lambda
                                      )
             coefficients = model$coef
             selected_vars = model$selectedFeatures
@@ -145,11 +153,12 @@ bagging <- function(x, y, testData, model_type,
             # model <- logisticRegression(x = bootstrap_data[, -ncol(bootstrap_data)], y = bootstrap_data[, ncol(bootstrap_data)], lambda = lambda)
             model = logistic_regression(x = as.matrix(bootstrap_data[, -ncol(bootstrap_data)]),
                                      y = bootstrap_data[, ncol(bootstrap_data)],
-                                     alpha = 0.5,
+                                     alpha = 1,
                                      importance = importance,
                                      type = type,
                                      ignoreWarnings = ignoreWarnings,
-                                     nfolds = nfolds
+                                     nfolds = nfolds, k = k,
+                                     lambda = lambda
                                     )
             coefficients = model$coef
             selected_vars = model$selectedFeatures
@@ -168,7 +177,8 @@ bagging <- function(x, y, testData, model_type,
                                      importance = importance,
                                      type = type,
                                      ignoreWarnings = ignoreWarnings,
-                                     nfolds = nfolds
+                                     nfolds = nfolds, k = k,
+                                     lambda = lambda
                                     )
             coefficients = model$coef
             selected_vars = model$selectedFeatures
@@ -188,7 +198,8 @@ bagging <- function(x, y, testData, model_type,
                                      type = type,
                                      alpha = 1,
                                      ignoreWarnings = ignoreWarnings,
-                                     nfolds = nfolds
+                                     nfolds = nfolds, k = k,
+                                     lambda = lambda
                                      )
             coefficients = model$coef
             selected_vars = model$selectedFeatures
@@ -207,7 +218,8 @@ bagging <- function(x, y, testData, model_type,
                                      importance = importance,
                                      type = type,
                                      ignoreWarnings = ignoreWarnings,
-                                     nfolds = nfolds
+                                     nfolds = nfolds, k = k,
+                                     lambda = lambda
                                      )
             coefficients = model$coef
             selected_vars = model$selectedFeatures
@@ -227,7 +239,8 @@ bagging <- function(x, y, testData, model_type,
             model = svmModel(data, responseVariable = "y",
                              importance = importance, kernel = kernel,
                              type = type, cost = cost, gamma = NULL,
-                             epsilon = epsilon, degree = degree, coef0 = coef0, nfolds = nfolds
+                             epsilon = epsilon, degree = degree, coef0 = coef0,
+                             nfolds = nfolds, k = k
             )
             # model = svmModel(data, responseVariable = "y", importance = TRUE, kernel = "radial", type = "class")
             testSet = scale(testSet)
@@ -245,10 +258,10 @@ bagging <- function(x, y, testData, model_type,
         if (model_type == "svm"){
             if(type == "class"){
                 preds = predict(model, test_x, type = "class")
-                print(head(preds))
-                class_levels <- levels(model$fitted)
-                # Convert numerical labels to character labels using class levels
-                preds <- class_levels[preds]
+                # print(head(preds))
+                # class_levels <- levels(model$fitted)
+                # # Convert numerical labels to character labels using class levels
+                # preds <- class_levels[preds]
                 predicted_values[, i] = preds
             } else{
                 predicted_values[, i] = predict(model, test_x)

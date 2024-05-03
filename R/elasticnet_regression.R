@@ -1,6 +1,10 @@
 library(glmnet)
 
-elastic_net_regression <- function(x, y, alpha = NULL, lambda = NULL, importance = FALSE, type = "default", nfolds = 5, ignoreWarnings = T) {
+elastic_net_regression <- function(x, y, alpha = 0.5,
+                                   lambda = NULL, importance = FALSE,
+                                   type = "default", nfolds = 5,
+                                   ignoreWarnings = T, k = 6
+                                   ) {
     if (!is.null(alpha) && !is.numeric(alpha)) {
         stop("alpha parameter must be a numeric value")
     }
@@ -16,6 +20,15 @@ elastic_net_regression <- function(x, y, alpha = NULL, lambda = NULL, importance
     if(!is.numeric(nfolds)){
         stop("parameter 'nfolds' must be of type numeric.")
     }
+    if(!is.null(k)){
+        if(!is.numeric(k)){
+            stop("parameter 'k' must be of type numeric")
+        }
+        else if ( k < 1){
+            stop("parameter 'k' must be >= 1.")
+        }
+    }
+
     if(is.matrix(x)){
         x = data.frame(x)
     }
@@ -27,12 +40,25 @@ elastic_net_regression <- function(x, y, alpha = NULL, lambda = NULL, importance
         y <- as.factor(y)
     }
 
-    if(importance){
-        cv.fit = crossValidation(x, y, type = type, nfolds = nfolds)
+    # if(importance){
+    #     cv.fit = crossValidation(x, y, type = type, nfolds = nfolds)
+    #     print(cv.fit)
+    #     x = x[, cv.fit$features]
+    #     lambda = cv.fit$bestLambda
+    #     alpha = cv.fit$alpha
+    # }
+
+    if(is.null(k) && importance){
+        warning("Please provide parameter 'k' for selecting k most informative predictors.
+                Defaulting to use cross validation to obtain important features.")
+        cv.fit = crossValidation(x, y, alpha = alpha, type = type, nfolds = nfolds)
         print(cv.fit)
         x = x[, cv.fit$features]
         lambda = cv.fit$bestLambda
-        alpha = cv.fit$alpha
+    }
+    else{
+        selected_vars = getKImportantPredictors(x, y, type = type, k = k )
+        x = x[, selected_vars]
     }
 
     if (is.null(lambda)) {
@@ -41,12 +67,12 @@ elastic_net_regression <- function(x, y, alpha = NULL, lambda = NULL, importance
             warning("Please provide lambda. Setting lambda to default value 0.01")
         }
     }
-    # if (is.null(alpha)) {
-    #     alpha <- 0.5
-    #     if(!ignoreWarnings){
-    #         warning("Please provide alpha for elastic_net regression. Setting alpha to default value 0.5")
-    #     }
-    # }
+    if (is.null(alpha)) {
+        alpha <- 0.5
+        if(!ignoreWarnings){
+            warning("Please provide alpha for elastic_net regression. Setting alpha to default value 0.5")
+        }
+    }
     if(type == "class"){
         if (length(unique(y)) == 2) {
             # Binary classification

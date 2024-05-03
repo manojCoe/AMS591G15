@@ -1,7 +1,7 @@
 library(glmnet)
 
 linear_regression <- function(x, y, alpha = 1, lambda = NULL, importance = FALSE, type = "default", nfolds = 10, ignoreWarnings = T, k = 6) {
-    if (!is.numeric(alpha)) {
+    if (!is.null(alpha) && !is.numeric(alpha)) {
         stop("alpha parameter must be a numeric value")
     }
     if (!is.null(lambda) && !is.numeric(lambda)) {
@@ -26,8 +26,13 @@ linear_regression <- function(x, y, alpha = 1, lambda = NULL, importance = FALSE
     if(importance && !is.numeric(k)){
         stop("parameter 'k' must be of type numeric")
     }
-    if(!is.null(k) && k<1){
-        stop("parameter 'k' must be >= 1.")
+    if(!is.null(k)){
+        if(!is.numeric(k)){
+            stop("parameter 'k' must be of type numeric")
+        }
+        else if ( k < 1){
+            stop("parameter 'k' must be >= 1.")
+        }
     }
 
     if(length(colnames(x)) == 1){

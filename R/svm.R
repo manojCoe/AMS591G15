@@ -1,6 +1,11 @@
 library(e1071)
 
-svmModel = function(data, importance = FALSE, responseVariable, kernel = "radial", type = "default", cost = 1, gamma = NULL, epsilon = 0.1, degree = 3, coef0 = 0, nfolds = 10) {
+svmModel = function(data, importance = FALSE,
+                    responseVariable, kernel = "radial",
+                    type = "default", cost = 1, gamma = NULL,
+                    epsilon = 0.1, degree = 3, coef0 = 0,
+                    nfolds = 10, k = 6
+                    ) {
     if (!is.null(gamma) && !is.numeric(gamma)) {
         stop("gamma parameter must be numeric")
     }
@@ -28,6 +33,12 @@ svmModel = function(data, importance = FALSE, responseVariable, kernel = "radial
     }
     if(!is.character(responseVariable)){
         stop("parameter 'responseVariable' must be a string")
+    }
+    if(importance && !is.numeric(k)){
+        stop("parameter 'k' must be of type numeric")
+    }
+    if(!is.null(k) && k<1){
+        stop("parameter 'k' must be >= 1.")
     }
 
     x = data[, !names(data) %in% responseVariable, drop = FALSE]
@@ -64,9 +75,12 @@ svmModel = function(data, importance = FALSE, responseVariable, kernel = "radial
 
 
     if(importance){
-        cv.fit = crossValidation(x_copy, y_copy, alpha = 1, type = type, nfolds = nfolds)
-        print(cv.fit)
-        print(coef(cv.fit$fit))
+        # cv.fit = crossValidation(x_copy, y_copy, alpha = 1, type = type, nfolds = nfolds)
+        # print(cv.fit)
+        # print(coef(cv.fit$fit))
+        selected_vars = getKImportantPredictors(x, y, type = type, k = k )
+        x = x[, selected_vars]
+        data = data.frame(x, y)
         parameter_grid <- list(
             linear = expand.grid(cost = c(0.1, 1, 10)),
             polynomial = expand.grid(cost = c(0.1, 1, 10), degree = c(2, 3, 4)),
@@ -78,10 +92,12 @@ svmModel = function(data, importance = FALSE, responseVariable, kernel = "radial
 
 
         tune.control = tune.control(sampling = "cross", cross = nfolds)
-        finalData = data.frame(data[, cv.fit$features], y)
-        fit = tune(svm, y ~ ., data = finalData, kernel = kernel, tunecontrol = tune.control, ranges = parameter_grid[[kernel]], type = svmType)
+        # finalData = data.frame(data[, cv.fit$features], y)
+        # finalData = data
+        fit = tune(svm, y ~ ., data = data, kernel = kernel, tunecontrol = tune.control, ranges = parameter_grid[[kernel]], type = svmType)
 
-        return(list(fit = fit$best.model, selectedFeatures = colnames(data[, cv.fit$features])))
+        # return(list(fit = fit$best.model, selectedFeatures = colnames(data[, cv.fit$features])))
+        return(list(fit = fit$best.model, selectedFeatures = colnames(data[, selected_vars])))
     }
     else{
         print(class(data$y))

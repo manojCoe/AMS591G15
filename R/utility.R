@@ -1,6 +1,9 @@
 library(randomForest)
 
 getKImportantPredictors = function(x, y, type = "default", k = 6){
+    if(is.data.frame(y)){
+        y = as.vector(y$y)
+    }
     # Train the Random Forest model
     rf_model <- randomForest(x = x, y = y, ntree = 500, importance = TRUE)
 
