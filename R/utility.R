@@ -31,6 +31,9 @@ getKImportantPredictors = function(x, y, type = "default", k = 6){
     if(is.data.frame(y)){
         y = as.vector(y$y)
     }
+    if(type == "class" && class(y) == "integer"){
+        y = as.factor(y)
+    }
     # Train the Random Forest model
     rf_model <- randomForest(x = x, y = y, ntree = 500, importance = TRUE)
 

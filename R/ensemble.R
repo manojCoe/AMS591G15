@@ -260,8 +260,9 @@ ensemble <- function(x, y, testData, responseVariable = NULL, models,
                 testSet = preprocessTestData(subset(testData, select = -which(names(testData) == responseVariable)), intercept = FALSE)
                 testSet = scale(testSet)
                 test_x = testSet[, model$selectedFeatures]
+                print("SVM")
                 if(type == "class"){
-                    preds <- predict(model$fit, test_x, type = "class")
+                    preds <- as.character(predict(model$fit, test_x, type = "class"))
                 } else{
                     preds = as.vector(predict(model$fit, test_x))
                 }
@@ -320,11 +321,13 @@ ensemble <- function(x, y, testData, responseVariable = NULL, models,
             # final_predicted_values <- class_levels[final_predicted_values]
         }
         else{
-            combined_matrix <- matrix(as.numeric(unlist(combined_matrix)), nrow = nrow(prediction_bagging[[1]]))
+            if(length(models) >=2){
+                combined_matrix <- matrix(as.numeric(unlist(combined_matrix)), nrow = nrow(prediction_bagging[[1]]))
+            }
 
             # Apply the function to get the final predictions
             final_predicted_values <- apply(combined_matrix, 1, function(x) {
-                as.character(names(which.max(table(x))))
+                names(which.max(table(x)))
             })
         }
         final_predicted_values = as.character(final_predicted_values)
