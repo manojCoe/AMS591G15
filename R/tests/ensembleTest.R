@@ -85,3 +85,32 @@ rmse(res$predictions, testData$y)
 rmse(res$weightedPredictions, testData$y)
 # res = bagging(x, y, responseVariable = "y", testData = testData, model_type = "lasso", R = 20, ignoreWarnings = T, importance = T)
 # res = bagging(x, y, responseVariable = "y", testData = testData, model_type = "elastic_net", R = 20, ignoreWarnings = T, importance = T)
+
+
+# p>>n
+# Set seed for reproducibility
+set.seed(42)
+
+# Number of samples (n) and features (p)
+n <- 100
+p <- 1000
+
+# Generate random features
+X <- matrix(rnorm(n * p), nrow = n, ncol = p)
+
+# Generate a binary target variable
+# Assuming some linear combination of the first 10 features plus random noise
+coefficients <- rnorm(10)
+y <- X[, 1:10] %*% coefficients + rnorm(n)
+y_binary <- as.integer(y > median(y))  # Convert to binary outcome
+
+data = data.frame(X, y_binary)
+trainID <- sample(1:nrow(data),round(0.75*nrow(data)))
+trainData <- data[trainID,]
+testData <- data[-trainID,]
+
+x = model.matrix(y_binary ~ ., data = trainData)[, -1]
+y = trainData$y
+
+head(trainData)
+res = ensemble(x, y, testData = testData, models = c("logistic", "svm", "lasso", "elastic_net"), bagging = F, responseVariable = "y_binary", R = 10, type = "class", ignoreWarnings = T, importance = F, nfolds = 10)

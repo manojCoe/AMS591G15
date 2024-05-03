@@ -81,9 +81,9 @@ ensemble <- function(x, y, testData, responseVariable = NULL, models,
     if(!is.data.frame(y) && !is.matrix(y) && !is.factor(y) && !is.numeric(y)){
         stop("y should be of type data.frame, matrix, factor or numeric")
     }
-    if(is.numeric(y) && type == "class"){
-        stop("class has 1 or 0 observations; not allowed for regression model")
-    }
+    # if(is.numeric(y) && type == "class"){
+    #     stop("class has 1 or 0 observations; not allowed for regression model")
+    # }
     if(!is.data.frame(testData) && !is.matrix(testData)){
         if(is.null(testData)){
             stop("Missing attribute 'testData'")

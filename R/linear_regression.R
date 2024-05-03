@@ -47,6 +47,15 @@ linear_regression <- function(x, y, alpha = 1, lambda = NULL, importance = FALSE
         x = data.frame(x)
     }
 
+    if(ncol(x)>nrow(x)){
+        print("p>>n setting importance = TRUE for selecting k most informative predictors.")
+        importance = TRUE
+        if(is.null(k)){
+            warning("parameter 'k' is missing, setting it to default value : 6")
+            k = 6
+        }
+    }
+
     if(importance && !is.numeric(k)){
         stop("parameter 'k' must be of type numeric")
     }

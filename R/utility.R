@@ -126,19 +126,19 @@ getAccuracyForClassification = function(preds, act){
 
 getWeightedAverage = function(accuracies, all_predictions, act){
     actual_labels = levels(act)
-    if (length(unique(actual_labels)) == 2) {
-        weights <- 1 / accuracies
-    } else {
-        exp_accuracies <- exp(accuracies)
-        weights <- exp_accuracies / sum(exp_accuracies)
-    }
+    # if (length(unique(actual_labels)) == 2) {
+    #     weights <- 1 / accuracies
+    # } else {
+    #     exp_accuracies <- exp(accuracies)
+    #     weights <- exp_accuracies / sum(exp_accuracies)
+    # }
 
     # Rank models based on accuracy
-    # rank <- rank(-accuracies)  # Use negative sign for descending order
-    #
-    # # Calculate weights based on rank
-    # weights <- 1 / rank
-    # weights <- weights / sum(weights)
+    rank <- rank(-accuracies)  # Use negative sign for descending order
+
+    # Calculate weights based on rank
+    weights <- 1 / rank
+    weights <- weights / sum(weights)
 
     # Calculate weighted average
     final_predictions <- apply(all_predictions, 1, function(row) sum(row == unique(actual_labels)) / length(unique(actual_labels)))

@@ -64,6 +64,14 @@ elastic_net_regression <- function(x, y, alpha = 0.5,
     if(is.matrix(x)){
         x = data.frame(x)
     }
+    if(ncol(x)>nrow(x)){
+        print("p>>n setting importance = TRUE for selecting k most informative predictors.")
+        importance = TRUE
+        if(is.null(k)){
+            warning("parameter 'k' is missing, setting it to default value : 6")
+            k = 6
+        }
+    }
     x <- convertCatToNumeric(x, intercept = FALSE)
     x <- x$data
 

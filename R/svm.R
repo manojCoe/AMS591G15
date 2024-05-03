@@ -116,7 +116,14 @@ svmModel = function(data, importance = FALSE,
     # cat("class of x_copy: ", class(x_copy))
     # cat("class of y_copy: ", class(y_copy))
 
-
+    if(ncol(x)>nrow(x)){
+        print("p>>n setting importance = TRUE for selecting k most informative predictors.")
+        importance = TRUE
+        if(is.null(k)){
+            warning("parameter 'k' is missing, setting it to default value : 6")
+            k = 6
+        }
+    }
 
     if(importance){
         # cv.fit = crossValidation(x_copy, y_copy, alpha = 1, type = type, nfolds = nfolds)

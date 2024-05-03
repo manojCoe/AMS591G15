@@ -144,12 +144,17 @@ bagging <- function(x, y, testData, model_type,
     coefficients = NULL
 
     if(p>n){
+        print("p>>n setting importance = TRUE for selecting k most informative predictors.")
         importance = TRUE
-        if(!is.null(lambda)){
-            warning("Number of predictors > number of observations.
-                    Lambda value will be replaced by lambda.min given by cross-validation"
-                    )
+        if(is.null(k)){
+            warning("parameter 'k' is missing, setting it to default value : 6")
+            k = 6
         }
+        # if(!is.null(lambda)){
+        #     warning("Number of predictors > number of observations.
+        #             Lambda value will be replaced by lambda.min given by cross-validation"
+        #             )
+        # }
     }
     else if(!is.null(lambda)){
         importance = FALSE
