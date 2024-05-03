@@ -1,3 +1,73 @@
+#'
+#' Ensemble Model
+#'
+#' Fits an ensemble model using a combination of different base models.
+#'
+#' @param x Predictor variables as a data frame or matrix.
+#' @param y Response variable as a vector.
+#' @param testData Test data for prediction.
+#' @param responseVariable Name of the response variable in the testData.
+#' @param models List of base models to be included in the ensemble.
+#' @param alpha Regularization parameter for certain models.
+#' @param lambda Regularization parameter for certain models.
+#' @param bagging Logical indicating whether to use bagging for model combination.
+#' @param R Number of bootstrap replicates if bagging is used.
+#' @param importance Logical indicating whether to consider feature importance in model selection.
+#' @param type Type of model, either "default" for regression or "class" for classification.
+#' @param nfolds Number of folds for cross-validation.
+#' @param ignoreWarnings Logical indicating whether to ignore warnings.
+#' @param kernel Kernel type for SVM models.
+#' @param cost Cost parameter for SVM models.
+#' @param degree Degree of polynomial kernel for SVM models.
+#' @param coef0 Intercept in polynomial kernel for SVM models.
+#' @param gamma Kernel coefficient for "radial", "polynomial", and "sigmoid" kernels for SVM models.
+#' @param epsilon Tolerance parameter for SVM models.
+#' @param k Number of important predictors to select.
+#'
+#' @return A list containing the ensemble predictions and, if applicable, evaluation metrics.
+#'
+#' @export
+#'
+#' @examples
+#' # ENSEMBLE
+
+#' # Binomial
+#' x <- matrix(rnorm(10000), ncol = 10)
+#' y <- factor(sample(0:1, 1000, replace = TRUE))
+#' data = data.frame(x, y)
+
+#' trainID <- sample(1:nrow(data), round(0.75 * nrow(data)))
+#' trainData <- data[trainID, ]
+#' testData <- data[-trainID, ]
+#' model_bagged <- ensemble(subset(trainData, select = -y), trainData$y, testData = testData, models = c("logistic","svm","ridge","elastic_net"), responseVariable = "y", R = 15, type = "class", importance = F, lambda = 0.1)
+#' # model_bagged <- ensemble(subset(trainData, select = -y), trainData$y, testData = testData, models = c("logistic","svm","ridge","elastic_net"), responseVariable = "y", R = 15, type = "class", importance = T, k = 6)
+#' model_bagged
+
+#' # Multinomial Classification
+
+#' x <- matrix(rnorm(1500), ncol = 15)
+#' y <- factor(sample(1:3, 100, replace = TRUE))
+
+#' data = data.frame(x, y)
+
+#' trainID <- sample(1:nrow(data), round(0.75 * nrow(data)))
+#' trainData <- data[trainID, ]
+#' testData <- data[-trainID, ]
+#' model_bagged <- ensemble(subset(trainData, select = -y), trainData$y, testData = testData, models = c("logistic","svm","ridge","elastic_net"), responseVariable = "y", R = 15, type = "class", importance = T, k = 6)
+#' model_bagged
+
+#' # Regression
+#' x <- matrix(rnorm(1000), ncol = 10)
+#' y <- rnorm(100)
+#' data = data.frame(x, y)
+
+#' trainID <- sample(1:nrow(data), round(0.75 * nrow(data)))
+#' trainData <- data[trainID, ]
+#' testData <- data[-trainID, ]
+#' model_bagged <- ensemble(subset(trainData, select = -y), trainData$y, testData = testData, models = c("svm","ridge","elastic_net"), responseVariable = "y", R = 15, importance = F)
+#' model_bagged
+
+
 ensemble <- function(x, y, testData, responseVariable = NULL, models,
                      alpha = NULL, lambda = NULL, bagging = FALSE, R = 10,
                      importance = FALSE, type = "default", nfolds = 10,

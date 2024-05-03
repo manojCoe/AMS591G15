@@ -1,5 +1,37 @@
 library(glmnet)
 
+#' Elastic Net Regression
+#'
+#' Fits an elastic net regression model using the glmnet package.
+#'
+#' @param x Predictor variables as a data frame or matrix.
+#' @param y Response variable as a vector.
+#' @param alpha Regularization parameter controlling the balance between L1 and L2 penalties.
+#' @param lambda Regularization parameter controlling the strength of the penalty term.
+#' @param importance Logical indicating whether to perform feature selection based on importance.
+#' @param type Type of model, either "default" for regression or "class" for classification.
+#' @param nfolds Number of folds for cross-validation.
+#' @param ignoreWarnings Logical indicating whether to ignore warnings.
+#' @param k Number of important predictors to select.
+#'
+#' @return A list containing the fitted model, coefficients, and selected features.
+#'
+#' @export
+#'
+#' @examples
+#'library(glmnet)
+
+#'# Example data
+#'set.seed(123)
+#'train_features <- matrix(rnorm(1000), ncol = 10)
+#'train_labels <- rnorm(100)
+
+#'# Fit an elastic net regression model
+#'elastic_net_result <- elastic_net_regression(x = train_features, y = train_labels, alpha = 0.5, lambda = 0.1, importance = TRUE, type = "default")
+
+#'# View the results
+#'print(elastic_net_result)
+
 elastic_net_regression <- function(x, y, alpha = 0.5,
                                    lambda = NULL, importance = FALSE,
                                    type = "default", nfolds = 5,

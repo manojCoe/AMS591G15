@@ -1,3 +1,17 @@
+#' Predict Regression
+#'
+#' Predicts the response variable using the coefficients and new data.
+#'
+#' @param coefficients A matrix of regression coefficients.
+#' @param newdata The new data for prediction.
+#' @param fit The fitted model object (optional).
+#'
+#' @return A vector of predicted values.
+#' @export
+#'
+
+
+
 predict_regression <- function(coefficients, newdata, fit= NULL) {
 
     if(!is.null(fit) && ((is.data.frame(newdata) && length(colnames(newdata)) == 1) || is.numeric(newdata))){

@@ -1,5 +1,32 @@
 library(randomForest)
 
+#' Get K Important Predictors
+#'
+#' Retrieves the top K important predictors using Random Forest feature importance.
+#'
+#' @param x The predictor variables.
+#' @param y The response variable.
+#' @param type The type of analysis ("default" or "class").
+#' @param k The number of important predictors to select.
+#'
+#' @return A character vector of the top K important predictors.
+#' @export
+#'
+#' @examples
+#' # Load required library
+#'library(randomForest)
+
+#'# Generate sample data
+#'set.seed(123)
+#'x <- matrix(rnorm(100), ncol = 5)
+#'y <- sample(0:1, 20, replace = TRUE)
+
+#'# Get top 3 important predictors
+#'important_predictors <- getKImportantPredictors(x, y, type = "default", k = 3)
+
+#'# Display the top important predictors
+#'print(important_predictors)
+
 getKImportantPredictors = function(x, y, type = "default", k = 6){
     if(is.data.frame(y)){
         y = as.vector(y$y)

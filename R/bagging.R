@@ -21,11 +21,45 @@
  #'
  #' @return A list containing predicted values, variable importance scores, and additional metrics.
  #'
- #' @export
- #'
  #' @examples
- #' bagging(x = train_features, y = train_labels, testData = test_data, model_type = "svm", responseVariable = "class", R = 10, type = "class", nfolds = 5, kernel = "radial", cost = 1)
+ #' #' # Load required libraries
+ #' library(glmnet)
  #'
+ #' # Define sample data
+ #' set.seed(123)
+ #' n <- 200  # Number of data points
+ #' x <- seq(1, 10, length.out = n)
+ #' y <- 2*x + rnorm(n, mean = 0, sd = 2)
+ #' data <- data.frame(x, y)
+ #'
+ #' # Split data into training and test sets
+ #' trainID <- sample(1:nrow(data), round(0.75 * nrow(data)))
+ #' trainData <- data[trainID, ]
+ #' testData <- data[-trainID, ]
+ #'
+ #' # Example usage of bagging function
+ #' bagging(x = trainData[, -which(names(trainData) == "y")],
+ #'          y = trainData$y,
+ #'          testData = testData,
+ #'          model_type = "linear",
+ #'          responseVariable = "y",
+ #'          R = 10,
+ #'          type = "default",
+ #'          lambda = 0.1,
+ #'          alpha = 0.5,
+ #'          ignoreWarnings = TRUE,
+ #'          importance = TRUE,
+ #'          nfolds = 5,
+ #'          kernel = "radial",
+ #'          cost = 1,
+ #'          degree = 3,
+ #'          coef0 = 0,
+ #'          gamma = NULL,
+ #'          epsilon = 0.1,
+ #'          k = 6
+ #'          )
+ #'
+
 bagging <- function(x, y, testData, model_type,
                     responseVariable = NULL, R = 10,
                     type = "default", lambda = NULL,

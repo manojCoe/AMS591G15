@@ -1,4 +1,35 @@
 library(glmnet)
+#' Title
+#'
+#' @param x The predictor variables.
+#' @param y The response variable.
+#' @param alpha The elastic net mixing parameter.
+#' @param lambda The penalty parameter.
+#' @param importance Logical indicating whether to perform feature importance selection.
+#' @param type The type of logistic regression. Currently only supports "class" for classification.
+#' @param nfolds The number of folds for cross-validation.
+#' @param ignoreWarnings Logical indicating whether to ignore warnings.
+#' @param k The number of important features to select.
+#'
+#' @return A list containing the fitted model, coefficients, and selected features.
+#' @export
+#'
+#' @examples
+#'# Load required libraries
+#'library(glmnet)
+
+#'# Generate sample data
+#'set.seed(123)
+#'x <- matrix(rnorm(100), ncol = 5)
+#'y <- sample(0:1, 20, replace = TRUE)
+
+#'# Perform logistic regression
+#'logistic_result <- logistic_regression(x, y, alpha = 0.5, lambda = 0.1, importance = TRUE, type = "class", nfolds = 5)
+
+#'# Display the results
+#'print(logistic_result)
+
+
 
 logistic_regression <- function(x, y, alpha = alpha, lambda = NULL, importance = FALSE, type = "default", nfolds = 10, ignoreWarnings = T, k = 6) {
     if (!is.null(alpha) && !is.numeric(alpha)) {

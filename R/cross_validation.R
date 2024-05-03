@@ -1,3 +1,35 @@
+#' Cross-validation Function
+#'
+#' Performs cross-validation for generalized linear models using the glmnet package.
+#'
+#' @param x Predictor variables as a data frame or matrix.
+#' @param y Response variable as a vector.
+#' @param alpha Regularization parameter for elastic net regularization.
+#' @param lambda Regularization parameter for penalized models.
+#' @param nfolds Number of folds for cross-validation.
+#' @param type Type of model, either "default" for regression or "class" for classification.
+#'
+#' @return A list containing the fitted model, best lambda value, selected features, alpha value, number of folds, and type of model.
+#'
+#' @export
+#'
+#' @examples
+#' # Load required libraries
+#'library(glmnet)
+
+#'# Generate sample data
+#'set.seed(123)
+#'x <- matrix(rnorm(100), ncol = 5)
+#'y <- rnorm(20)
+
+#'# Perform cross-validation
+#'cv_result <- crossValidation(x, y, nfolds = 5, type = "default")
+
+#'# Display the results
+#'print(cv_result)
+
+
+
 crossValidation = function(x, y, alpha = NULL, lambda = NULL, nfolds = 10, type = "default"){
     if (!is.null(alpha) && !is.numeric(alpha)) {
         stop("alpha parameter must be a numeric value")

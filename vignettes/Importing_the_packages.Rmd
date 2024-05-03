@@ -22,7 +22,7 @@ library(AMS591G15)
 
 ## Introduction:
 
-In this document, we delve into various regression techniques using R packages. We begin by importing our dataset, located at "C:/Users/MSP/Downloads/Mystery.csv". After preprocessing to handle any missing values, we split the data into training and testing sets, with a 75-25 split ratio, to facilitate model evaluation.
+In this document, we delve into various regression techniques using R packages. We begin by importing our dataset, located at path. After preprocessing to handle any missing values, we split the data into training and testing sets, with a 75-25 split ratio, to facilitate model evaluation.
 
 Next, we explore different regression methods, starting with linear regression. We fit models both with and without intercept terms and assess their performance using root mean squared error (RMSE) on the test data. Subsequently, we examine ridge regression and utilize the glmnet package for regularization. Similarly, we evaluate the performance of ridge regression models using RMSE.
 
@@ -41,6 +41,69 @@ Throughout this document, we emphasize the importance of leveraging R packages f
 The first place to define a dependency in a package is the DESCRIPTION file. In the DESCRIPTION file, the dependencies of the package are defined. These dependencies specify which other packages are required for the proper functioning of the package. 
 
 For example, the package may depend on packages like glmnet and e1071 for specific functionalities. These dependencies are listed under the Imports field. It's important to specify the minimal required version of each dependency to ensure compatibility with the package. For instance, if the package relies on functions introduced in glmnet version 4.1 or later, it should be specified as Imports: glmnet (>= 4.1). This ensures that users install a compatible version of glmnet before installing the package. While dependencies can also be specified under the Depends field, it's generally discouraged because it loads the dependency into the user's workspace, potentially causing conflicts with other packages. Using Imports is considered the proper way to specify dependencies without imposing them on the user.
+
+
+## WARNING MESSAGE!: 
+
+Missing data warning: You might receive a warning if there is any missing value in any given data. To address this, you can use functions like na.omit() to remove rows with missing values or impute missing values using appropriate techniques.
+
+```{}
+# Before
+df <- read.csv("data.csv")
+# Assume 'df' contains missing values
+
+# After (handling missing values using na.omit())
+df <- read.csv("data.csv")
+df <- na.omit(df)
+
+```
+
+
+
+Non-conformable matrix warning: This warning might occur if arrays or matrices being operated on are not conformable. To address this, ensure that the dimensions of arrays or matrices are compatible for the intended operation.
+
+```{}
+
+# Before
+matrix1 <- matrix(1:9, nrow = 3, ncol = 3)
+matrix2 <- matrix(1:4, nrow = 2, ncol = 2)
+result <- matrix1 %*% matrix2  # Error: non-conformable arguments
+
+# After (ensuring conformable dimensions)
+matrix1 <- matrix(1:9, nrow = 3, ncol = 3)
+matrix2 <- matrix(1:6, nrow = 3, ncol = 2)
+result <- matrix1 %*% matrix2  # No error
+
+
+```
+
+
+When loading certain packages in R, you may encounter warning messages like:
+
+```{}
+Loading required package: glmnet
+Loading required package: Matrix
+Loaded glmnet 4.1-8
+Loading required package: e1071
+Loading required package: randomForest
+randomForest 4.7-1.1
+Type rfNews() to see new features/changes/bug fixes.
+
+```
+These warnings are normal and don't indicate any issues with your code. They simply inform you that specific packages are being loaded into your R session.
+
+To suppress these warning messages, you can use the suppressWarnings() function like this:
+
+```{}
+suppressWarnings({
+  library(glmnet)
+  library(e1071)
+  library(randomForest)
+})
+
+
+```
+Wrapping the library() function calls with suppressWarnings() prevents the warning messages from appearing in your console.
 
 
 ## Usage:

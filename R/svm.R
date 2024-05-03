@@ -1,5 +1,49 @@
 library(e1071)
 
+#' Support Vector Machine (SVM) Model
+#'
+#' Fits a support vector machine model using the e1071 package.
+#'
+#' @param data The dataset containing predictor variables and response variable.
+#' @param importance Logical indicating whether to perform feature importance selection.
+#' @param responseVariable The name of the response variable in the dataset.
+#' @param kernel The type of kernel function to be used in the SVM.
+#' @param type The type of SVM. "class" for classification and "eps-regression" for regression.
+#' @param cost The cost parameter for the SVM.
+#' @param gamma The kernel parameter for "radial", "polynomial", and "sigmoid" kernels.
+#' @param epsilon The epsilon parameter for the SVM.
+#' @param degree The degree of the polynomial kernel (only applicable if kernel = "polynomial").
+#' @param coef0 The coef0 parameter for the "polynomial" and "sigmoid" kernels.
+#' @param nfolds The number of folds for cross-validation.
+#' @param k The number of important features to select.
+#'
+#' @return A list containing the fitted SVM model and selected features.
+#' @export
+#'
+#' @examples
+#' # Load the required library
+#'library(e1071)
+
+#'# Generate sample data
+#'set.seed(123)
+#'x <- matrix(rnorm(100), ncol = 5)
+#'y <- as.factor(sample(0:1, 20, replace = TRUE))
+
+#'# Create a dataset
+#'data <- data.frame(x, y)
+
+#'# Fit an SVM model
+#'svm_model <- svmModel(data = data, importance = TRUE, responseVariable = "y", kernel = "radial", type = "class", cost = 1, gamma = 0.1, epsilon = 0.1, nfolds = 5, k = 3)
+
+#'# Print the selected features
+#'print(svm_model$selectedFeatures)
+
+#'# Print the SVM model details
+#'print(svm_model$fit)
+
+#'# Make predictions if needed
+#'# predictions <- predict(svm_model$fit, newdata = x_test)
+
 svmModel = function(data, importance = FALSE,
                     responseVariable, kernel = "radial",
                     type = "default", cost = 1, gamma = NULL,
