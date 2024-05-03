@@ -1,5 +1,31 @@
-library(glmnet)
-
+ library(glmnet)
+ #' Bagging Function
+ #'
+ #' Implements bagging (bootstrap aggregating) for machine learning models.
+ #'
+ #' @param x Training features as a data frame, matrix, or numeric vector.
+ #' @param y Training labels as a data frame, matrix, factor, or numeric vector.
+ #' @param testData Test data as a data frame or matrix.
+ #' @param model_type Type of model to use for bagging. Options include "linear", "logistic", "ridge", "lasso", "elastic_net", and "svm".
+ #' @param responseVariable Name of the response variable.
+ #' @param R Number of bootstrap samples.
+ #' @param type Type of model, either "default" for regression or "class" for classification.
+ #' @param lambda Regularization parameter for models that support it (e.g., Ridge, Lasso).
+ #' @param alpha Regularization parameter for models that support it (e.g., Lasso, Elastic Net).
+ #' @param ignoreWarnings Whether to ignore warnings during model fitting.
+ #' @param importance Whether to compute variable importance.
+ #' @param nfolds Number of folds for cross-validation.
+ #' @param kernel Kernel type for SVM models.
+ #' @param cost, degree, coef0, gamma, epsilon Hyperparameters for SVM models.
+ #' @param k Number of nearest neighbors for kNN models.
+ #'
+ #' @return A list containing predicted values, variable importance scores, and additional metrics.
+ #'
+ #' @export
+ #'
+ #' @examples
+ #' bagging(x = train_features, y = train_labels, testData = test_data, model_type = "svm", responseVariable = "class", R = 10, type = "class", nfolds = 5, kernel = "radial", cost = 1)
+ #'
 bagging <- function(x, y, testData, model_type,
                     responseVariable = NULL, R = 10,
                     type = "default", lambda = NULL,

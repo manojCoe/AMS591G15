@@ -1,0 +1,337 @@
+---
+title: "Introduction to R"
+output: rmarkdown::html_vignette
+vignette: >
+  %\VignetteIndexEntry{Introduction to R}
+  %\VignetteEngine{knitr::rmarkdown}
+  %\VignetteEncoding{UTF-8}
+---
+
+```{r, include = FALSE}
+knitr::opts_chunk$set(
+  collapse = TRUE,
+  comment = "#>"
+)
+```
+
+```{r setup}
+library(AMS591G15)
+```
+
+----------------------------------------------------------
+**Description:**
+----------------------------------------------------------
+
+The **R package** is designed to streamline the process of data analysis and machine learning tasks, simplifying complex procedures into clear and concise steps. Whether you're a beginner or an experienced data scientist, this package provides a comprehensive set of functions to handle data manipulation, model building, and evaluation with ease. 
+
+
+-----------------------------------------------------------
+**Objective:**
+-----------------------------------------------------------
+
+
+This R package is designed to handle both **binary and continuous response variables**, along with a matrix of candidate predictors. The predictors can be a mix of continuous, discrete, and binary variables, and the package accommodates scenarios where the number of predictors greatly exceeds the sample size.
+The **primary goal** is to enable users to efficiently build predictive models for both binary and continuous response variables, while considering large numbers of predictors. Additionally, the package will offer functionalists for pre-screening informative predictors, performing bagging to enhance model robustness, and supporting ensemble learning for combining multiple models. 
+
+--------------------------------------------------------------
+**Note that:**
+---------------------------------------------------------------
+
+
+The package implements several regression models, including linear regression, logistic regression, ridge regression, lasso regression, and elastic net. Additionally, users can choose one machine learning model from support vector machine, random forest, or boosted trees. The package utilizes functions from R packages **glmnet, e1071, randomForest, and xgboost** for these models. For scenarios where the number of predictors is much larger than the sample size, the package offers an option to pre-screen for the top K most informative predictors. This feature helps in improving model efficiency. The package also incorporates bagging techniques for selected models to enhance model robustness. Users can choose to perform ensemble learning by fitting multiple models on the same dataset, and the package provides a combined final result.
+
+
+
+
+##  What is `Vignette`? 
+```{}
+The package includes a comprehensive vignette that guides users on how to utilize its functionalities effectively.
+```
+A vignette is a document that provides a detailed explanation of a package's functionality, including examples and code demonstrations. Vignettes are typically written in a narrative format and can include text, code chunks, images, and other elements to help users understand how to use the package effectively.
+
+
+## Data Screening and Model Evaluation Procedures: 
+
+
+*  1]Partitioning the data into training and testing sets using sample() function.
+
+*  2] Applying different regression techniques like Linear Regression, Ridge Regression, Lasso Regression, ElasticNet Regression, Logistic Regression, Support Vector Machine (SVM), and Bagging.
+
+*  3] Employing cross-validation techniques such as k-fold cross-validation and bootstrapping.
+
+*  4] Utilizing feature selection methods like Lasso and ElasticNet regression to identify informative predictors.
+
+*  5]Assessing model performance using metrics like Root Mean Squared Error (RMSE) and confusion matrix.
+
+
+## Parameters: 
+
+- `x`
+- `y`
+- `alpha`
+- `lambda`
+- `importance`
+- `type`
+- `nfolds`
+- `ignoreWarnings`
+- `testData`
+- `model_type`
+- `R`
+- `data`
+- `kernel`
+- `cost`
+- `gamma`
+- `epsilon`
+- `degree`
+- `coef0`
+
+
+
+## WARNING MESSAGE!: 
+
+Missing data warning: You might receive a warning if there is any missing value in any given data. To address this, you can use functions like na.omit() to remove rows with missing values or impute missing values using appropriate techniques.
+
+```{}
+# Before
+df <- read.csv("data.csv")
+# Assume 'df' contains missing values
+
+# After (handling missing values using na.omit())
+df <- read.csv("data.csv")
+df <- na.omit(df)
+
+```
+
+
+
+Non-conformable matrix warning: This warning might occur if arrays or matrices being operated on are not conformable. To address this, ensure that the dimensions of arrays or matrices are compatible for the intended operation.
+
+```{}
+
+# Before
+matrix1 <- matrix(1:9, nrow = 3, ncol = 3)
+matrix2 <- matrix(1:4, nrow = 2, ncol = 2)
+result <- matrix1 %*% matrix2  # Error: non-conformable arguments
+
+# After (ensuring conformable dimensions)
+matrix1 <- matrix(1:9, nrow = 3, ncol = 3)
+matrix2 <- matrix(1:6, nrow = 3, ncol = 2)
+result <- matrix1 %*% matrix2  # No error
+
+
+```
+
+
+## Dealing with "undefined global functions or variables:
+
+
+
+
+## Troubleshooting:
+
+
+
+## Tips to remember: 
+
+1] *Lambda Selection*: Notice how actModel$lambda.min is selected as the optimal lambda value for the elastic net model. Remind yourself to understand how lambda impacts model regularization and generalization.
+
+
+
+2] *Cross-Validation*: Pay attention to how cross-validation is used to select the best lambda value (cv.fit$bestLambda). Understand the importance of cross-validation in preventing overfitting and ensuring model robustness.
+
+
+3] *Model Evaluation*: After building the models, there's a series of evaluation steps such as computing RMSE (rmse(pred, testData$y)) and accuracy metrics like confusion matrices (confusionMatrix()). Remember to interpret these metrics in the context of the specific problem domain and model objectives.
+
+
+4] *Algorithm Selection*: Notice the variety of algorithms used - from elastic net regression to logistic regression and SVM. Understand the strengths and weaknesses of each algorithm and how they relate to the problem at hand.
+
+
+
+##  What is `Bagging`? 
+
+```{}
+Bootstrap Aggregating, which is a machine learning ensemble meta-algorithm designed to improve the stability and accuracy of predictive models. Bagging involves creating multiple models, typically decision trees, using subsets of the training data selected with replacement (bootstrap samples).
+
+```
+
+#### -- Bootstrap Sampling
+Random samples (with replacement) are drawn from the training dataset. This results in multiple subsets of the data, each potentially containing duplicate instances.
+
+
+#### -- Model Building
+A base learning algorithm, often a decision tree, is trained on each bootstrap sample. This means that multiple models are trained on different subsets of the data.
+
+
+#### -- Aggregation
+The predictions from each individual model are combined to make a final prediction. For regression problems, this might involve averaging the predictions, while for classification problems, it often involves taking a majority vote.
+
+-------------------------------------------------------------
+**Bagging**
+-------------------------------------------------------------
+
+The bagging() function, supports various base learners including linear and logistic regression, enhancing model stability and reducing variance.
+
+
+
+Description: 
+
+
+```{}
+bagging <- function(x, y, testData, model_type, responseVariable = NULL, R = 10, type = "response", lambda = NULL, alpha = NULL, ignoreWarnings = TRUE, importance = NULL) {
+```
+
+This line defines a function named bagging that takes several parameters:
+
+
+*  x: Predictor variables.
+
+*  y: Response variable.
+
+*  testData: Data to be used for testing the models.
+
+*  model_type: Type of model to be used for bagging. Can be one of ('linear', 'logistic', 'ridge', 'lasso', 'elastic_net').
+*  responseVariable: Name of the response variable.
+
+*  R: Number of bootstrap samples.
+
+*  type: Type of analysis. Default is "response".
+*  lambda: Regularization parameter. Default is NULL.
+
+*  alpha: The elastic net mixing parameter. Default is NULL.
+
+*  ignoreWarnings: Logical indicating whether to ignore warnings. Default is TRUE.
+
+
+*  importance: Logical indicating whether to compute variable importance. Default is NULL.
+
+
+
+```{}
+if(!is.data.frame(x) && !is.matrix(x)){
+    print(class(x))
+    stop("x should be of type data.frame or matrix")
+}:
+```
+
+Checks if x is a data frame or matrix. If not, throws an error.
+
+```{}
+if(!is.data.frame(y) && !is.matrix(y) && !is.factor(y) && !is.numeric(y)){
+    stop("y should be of type data.frame, matrix, factor, or numeric")
+}:
+```
+Checks if y is of appropriate types. If not, throws an error.
+
+```{}
+if(is.numeric(y) && type == "class"){
+    stop("class has 1 or 0 observations; not allowed for regression model")
+}:
+```
+Checks if the type is "class" when y is numeric. If so, throws an error.
+
+```{}
+if(!is.data.frame(testData) && !is.matrix(testData)){
+    if(is.null(testData)){
+        stop("Missing attribute 'testData'")
+    }
+    stop("y should be of type data.frame or matrix")
+}:
+```
+Checks if testData is a data frame or matrix. If not, throws an error.
+```{}
+if(is.null(responseVariable)){
+    stop("parameter 'responseVariable' should be a string.")
+}:
+```
+Checks if responseVariable is provided. If not, throws an error.
+
+```{}
+if( !(model_type %in% c("linear", "logistic", "ridge", "lasso", "elastic_net")) ){
+    stop("Please provide a valid model_type: ('linear', 'logistic', 'ridge', 'lasso', 'elastic_net')")
+}:
+```
+
+Checks if model_type is valid. If not, throws an error.
+
+```{}
+if (!is.null(alpha) && !is.numeric(alpha)) {
+    stop("alpha parameter must be a numeric value")
+}:
+```
+Checks if alpha is numeric. If not, throws an error.
+```{}
+if (!is.numeric(R)) {
+    stop("parameter 'R' must be a numeric value")
+}:
+```
+Checks if R is numeric. If not, throws an error.
+
+```{}
+if (!is.null(lambda) && !is.numeric(lambda)) {
+    stop("lambda parameter must be a numeric value")
+}:
+```
+Checks if lambda is numeric. If not, throws an error.
+
+```{}
+if(!is.character(type)){
+    stop("parameter 'type' must be a string. One of ('default', 'class')")
+}:
+```
+Checks if type is a character string. If not, throws an error.
+
+```{}
+if(!is.logical(ignoreWarnings)){
+    stop("parameter 'ignoreWarnings' must be of type logical TRUE/FALSE")
+}:
+```
+Checks if ignoreWarnings is logical. If not, throws an error.
+
+```{}
+if(model_type == "elastic_net" && is.null(alpha)){
+    alpha = 0.5
+    if(!ignoreWarnings){
+        warning("Missing alpha parameter. Setting to default value 0.5")
+    }
+}:
+```
+Checks if model_type is "elastic_net" and alpha is NULL. If so, sets alpha to a default value and issues a warning.
+
+```{}
+variable_importance = setNames(rep(0, ncol(x)), colnames(x)) # Variable importance score
+data = data.frame(x,y):
+```
+Combines predictor variables and response variable into a data frame.
+
+```{}
+data = na.omit(data):
+```
+Removes rows with missing values.
+```{}
+n <- nrow(data):
+```
+Stores the number of rows in the data.
+```{}
+n_test = nrow(testData):
+```
+Stores the number of rows in testData.
+```{}
+selected_vars = colnames(x):
+```
+Stores the column names of x as selected variables.
+
+```{}
+p <- ncol(data) - 1  # Number of predictor variables:
+```
+Stores the number of predictor variables.
+```{}
+predicted_values <- matrix(NA, nrow = n_test, ncol = R):
+```
+Creates a matrix to store predicted values from each model.
+```{}
+coefficients = NULL:
+```
+Initializes coefficients to NULL.
+
+
+

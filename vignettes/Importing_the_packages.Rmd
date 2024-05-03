@@ -1,0 +1,124 @@
+---
+title: "Importing R package"
+output: rmarkdown::html_vignette
+vignette: >
+  %\VignetteIndexEntry{Importing R package}
+  %\VignetteEngine{knitr::rmarkdown}
+  %\VignetteEncoding{UTF-8}
+---
+
+```{r, include = FALSE}
+knitr::opts_chunk$set(
+  collapse = TRUE,
+  comment = "#>"
+)
+```
+
+```{r setup}
+library(AMS591G15)
+```
+
+## Importing R package is easy
+
+## Introduction:
+
+In this document, we delve into various regression techniques using R packages. We begin by importing our dataset, located at "C:/Users/MSP/Downloads/Mystery.csv". After preprocessing to handle any missing values, we split the data into training and testing sets, with a 75-25 split ratio, to facilitate model evaluation.
+
+Next, we explore different regression methods, starting with linear regression. We fit models both with and without intercept terms and assess their performance using root mean squared error (RMSE) on the test data. Subsequently, we examine ridge regression and utilize the glmnet package for regularization. Similarly, we evaluate the performance of ridge regression models using RMSE.
+
+
+## Leveraging R Package for Efficient Lasso Regression and Classification:
+
+
+Moving on to lasso regression, we employ the lasso_regression function and consider its impact on feature selection. Through cross-validation, we tune hyperparameters and assess model performance. Finally, we explore classification tasks using logistic regression, implemented with lasso regularization.
+
+Throughout this document, we emphasize the importance of leveraging R packages for efficient model development and evaluation. By harnessing the capabilities of packages such as glmnet and caret, we streamline the implementation of complex regression techniques and enhance the reproducibility of our analyses.
+
+
+
+## Description file: 
+
+The first place to define a dependency in a package is the DESCRIPTION file. In the DESCRIPTION file, the dependencies of the package are defined. These dependencies specify which other packages are required for the proper functioning of the package. 
+
+For example, the package may depend on packages like glmnet and e1071 for specific functionalities. These dependencies are listed under the Imports field. It's important to specify the minimal required version of each dependency to ensure compatibility with the package. For instance, if the package relies on functions introduced in glmnet version 4.1 or later, it should be specified as Imports: glmnet (>= 4.1). This ensures that users install a compatible version of glmnet before installing the package. While dependencies can also be specified under the Depends field, it's generally discouraged because it loads the dependency into the user's workspace, potentially causing conflicts with other packages. Using Imports is considered the proper way to specify dependencies without imposing them on the user.
+
+
+## Usage:
+
+
+-------------------------------------------------------------
+**Data Handling & Partitioning: **
+--------------------------------------------------------------
+
+
+1] Data Handling: Load, preprocess, and manage your datasets effortlessly using   intuitive functions like read_data() and preprocess_data(). Missing values are handled efficiently with na.omit() to ensure data integrity.
+
+```{r}
+# Load required library
+library(AMS591G15)
+
+#Data Loading: Reading CSV File:
+# This reads a CSV file named "Mystery.csv" located at "C:/Users/Prasad/Downloads/" directory and assigns the content to the variable data. The read.csv() function is used to read CSV files into R data frames.
+data <- read.csv("C:/Users/Prasad/Downloads/Mystery.csv")
+
+#Preprocessing Data:
+# This defines a function named preprocess_data which takes one argument, data.
+
+preprocess_data <- function(data) {
+  preprocessed_data <- na.omit(data)
+  return(preprocessed_data)
+  
+#preprocessed_data <- na.omit(data): Inside the function, the na.omit() function is used to remove rows with missing values (NA or NaN) from the input data. It returns a new data frame with the rows containing missing values removed.
+
+#return(preprocessed_data): Finally, the preprocessed data frame preprocessed_data is returned from the function.
+}
+
+```
+
+
+2] Data Partitioning: Split your dataset into training and testing sets seamlessly with functions like train_test_split() based on specified proportions, ensuring robust model evaluation.
+
+```{r}
+# Load required library
+library(AMS591G15)
+
+# Data Partitioning: Splitting Dataset into Training and Testing Sets
+# This function splits the dataset into training and testing sets based on specified proportions.
+
+# train_test_split() function definition
+train_test_split <- function(data, train_prop = 0.75, test_prop = 0.25, seed = 123) {
+  set.seed(seed)  # Set seed for reproducibility
+  n <- nrow(data)  # Get number of rows in the dataset
+  
+  # Calculate number of rows for training and testing sets
+  train_size <- round(train_prop * n)
+  test_size <- round(test_prop * n)
+  
+  # Generate random indices for training and testing sets
+  train_indices <- sample(1:n, train_size)
+  test_indices <- setdiff(1:n, train_indices)
+  
+  # Create training and testing sets using the generated indices
+  train_data <- data[train_indices, ]
+  test_data <- data[test_indices, ]
+  
+  # Return the training and testing sets
+  return(list(train_data = train_data, test_data = test_data))
+}
+
+# Usage example:
+# Assuming 'data' is the dataset loaded previously using read_data() or preprocess_data()
+# Split the dataset into training and testing sets with 75% for training and 25% for testing
+split_data <- train_test_split(data, train_prop = 0.75, test_prop = 0.25)
+
+# Access the training set
+train_data <- split_data$train_data
+
+# Access the testing set
+test_data <- split_data$test_data
+
+```
+
+
+
+

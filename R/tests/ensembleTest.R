@@ -13,7 +13,7 @@ x = model.matrix(Species ~ ., data = trainData)[, -1]
 y = trainData$Species
 
 
-res = ensemble(x, y, testData = testData, models = c("logistic", "elastic_net"), bagging = T, responseVariable = "Species", R = 10, type = "class", ignoreWarnings = F, importance = F, nfolds = 10, lambda = 0.1)
+res = ensemble(x, y, testData = testData, models = c("logistic", "svm"), bagging = F, responseVariable = "Species", R = 10, type = "class", ignoreWarnings = F, importance = F, nfolds = 10, lambda = 0.1)
 res
 # confusionMatrix(as.factor(res[[1]]), testData$Species)
 # confusionMatrix(as.factor(res[[2]]), testData$Species)
@@ -26,7 +26,7 @@ res
 # binomial
 
 library(caret)
-PATH = "C:/Users/MSP/Downloads/Enigma.csv"
+PATH = "C:/Users/Prasad/Downloads/Mystery.csv"
 df = read.csv(PATH)
 
 df = na.omit(df)

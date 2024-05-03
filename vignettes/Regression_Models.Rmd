@@ -1,0 +1,1012 @@
+---
+title: "Introduction to Regression Models"
+output: rmarkdown::html_vignette
+vignette: >
+  %\VignetteIndexEntry{Introduction to Regression Models}
+  %\VignetteEngine{knitr::rmarkdown}
+  %\VignetteEncoding{UTF-8}
+---
+
+```{r, include = FALSE}
+knitr::opts_chunk$set(
+  collapse = TRUE,
+  comment = "#>"
+)
+```
+
+```{r setup}
+library(AMS591G15)
+```
+
+
+------------------------------------------------------------
+**Regression Models**
+-----------------------------------------------------------
+
+
+Regression Models: Regression models are statistical techniques used to understand the relationship between a dependent variable (response) and one or more independent variables (predictors). These models are widely used for prediction and inference in various fields.
+
+------------------------------------------------------------
+**Linear Regression**
+-------------------------------------------------------------
+
+Linear regression is one of the simplest and most commonly used regression techniques. It assumes a linear relationship between the independent variables and the dependent variable. The linearRegression() function allows you to build linear regression models easily. It supports both intercept (a constant term) and non-intercept forms.
+
+linear_regression function performs linear regression analysis using the glmnet package in R.
+
+Description: 
+
+```{}
+linear_regression <- function(x, y, alpha = 1, lambda = NULL, importance = FALSE, type = "default", nfolds = 10, ignoreWarnings = TRUE) {
+
+```
+
+This line defines a function named linear_regression that takes several parameters:
+
+* x: Predictor variables.
+* y: Response variable.
+* alpha: The elastic net mixing parameter, with default value 1.
+* lambda: Regularization parameter. Default is NULL.
+* importance: Logical indicating whether to perform feature selection. Default is FALSE.
+* type: Type of analysis. Default is "default".
+* nfolds: Number of folds for cross-validation. Default is 10.
+* ignoreWarnings: Logical indicating whether to ignore warnings. Default is TRUE.
+
+
+
+```{}if (!is.numeric(alpha)) { stop("alpha parameter must be a numeric value") }
+```
+
+Checks if alpha is numeric. If not, it stops the execution and throws an error message.
+
+```{}if (!is.null(lambda) && !is.numeric(lambda))}
+```
+
+stop("lambda parameter must be a numeric value") }:, Checks if lambda is numeric. If not, it stops the execution and throws an error message.
+
+```{}if (!is.character(type)) { stop("parameter 'type' must be a string.") }
+```
+
+Checks if type is a character string. If not, it stops the execution and throws an error message.
+```{}
+if (type == "class") { stop("Linear Regression only supports type = regression") }:
+```
+
+Checks if type is "class". If it is, it stops the execution and throws an error message.
+
+```{}
+if (!is.logical(importance)) { stop("parameter 'importance' must be of type logical TRUE/FALSE") }:
+```
+
+Checks if importance is logical. If not, it stops the execution and throws an error message.
+```{}
+if (!is.numeric(nfolds)) { stop("parameter 'nfolds' must be of type numeric.") }:
+```
+
+Checks if nfolds is numeric. If not, it stops the execution and throws an error message.
+```{}
+if (is.matrix(x)) { x = data.frame(x) }:
+```
+
+Checks if x is a matrix. If it is, converts it into a data frame.
+```{}
+x <- convertCatToNumeric(x, intercept = FALSE):
+```
+Converts categorical variables in x to numeric format.
+
+```{}
+x <- x$data:
+```
+Extracts the data frame from the converted x.
+
+```{}
+if (importance) { ... }:
+```
+If importance is TRUE, performs feature selection using cross-validation.
+```{}
+if (is.null(lambda)) { ... }:
+```
+If lambda is NULL, sets it to a default value of 0.01.
+```{}
+fit = glmnet(x, y, alpha = alpha, lambda = lambda):
+```
+Fits a linear regression model using the glmnet function.
+```{}
+result = list(fit = fit, coef = coef(fit), selectedFeatures = colnames(x)):
+```
+Creates a list containing the fitted model (fit), coefficients (coef), and selected features (selectedFeatures).
+```{}
+return(result):
+```
+Returns the result.
+
+## Sample Data: 
+
+```{r}
+set.seed(123)
+x2 <- rnorm(100)
+y <- 2 * x2 + rnorm(100)
+df <- data.frame(x2, y)
+
+```
+
+
+---------------------------------------------------------------------------------
+**Logistic Regression**
+---------------------------------------------------------------------------------
+
+The logisticRegression() function supports binary and multi-class classification with customizable options.
+
+Description: 
+
+```{}
+logistic_regression <- function(x, y, alpha = 1, lambda = NULL, importance = FALSE, type = "default", nfolds = 10, ignoreWarnings = TRUE) {
+
+```
+
+This line defines a function named logistic_regression that takes several parameters:
+
+*  x: Predictor variables.
+
+*  y: Response variable.
+
+*  alpha: The elastic net mixing parameter, with default value 1.
+
+*  lambda: Regularization parameter. Default is NULL.
+
+*  importance: Logical indicating whether to perform feature selection. Default is FALSE.
+*  type: Type of analysis. Default is "default".
+
+*  nfolds: Number of folds for cross-validation. Default is 10.
+*  ignoreWarnings: Logical indicating whether to ignore warnings. Default is TRUE.
+
+```{}
+if (!is.numeric(alpha)) { stop("alpha parameter must be a numeric value") }:
+```
+
+Checks if alpha is numeric. If not, it stops the execution and throws an error message.
+```{}
+if (!is.null(lambda) && !is.numeric(lambda)) { stop("lambda parameter must be a numeric value") }:
+```
+Checks if lambda is numeric. If not, it stops the execution and throws an error message.
+
+```{}
+if(!is.character(type)){ stop("parameter 'type' must be a string. One of ('default', 'class')") }:
+```
+Checks if type is a character string. If not, it stops the execution and throws an error message.
+
+```{}
+if(type != "class"){ stop("Logistic regression only supports type = class") }:
+```
+
+Checks if type is "class". If not, it stops the execution and throws an error message.
+```{}
+if(!is.logical(importance)){ stop("parameter 'importance' must be of type logical TRUE/FALSE") }:
+```
+
+Checks if importance is logical. If not, it stops the execution and throws an error message.
+
+```{}
+if(!is.numeric(nfolds)){ stop("parameter 'nfolds' must be of type numeric.") }:
+```
+Checks if nfolds is numeric. If not, it stops the execution and throws an error message.
+
+```{}
+if(is.matrix(x)){ x = data.frame(x) }:
+```
+
+Checks if x is a matrix. If it is, converts it into a data frame.
+```{}
+x <- convertCatToNumeric(x, intercept = FALSE):
+```
+Converts categorical variables in x to numeric format.
+
+```{}
+x <- x$data:
+```
+Extracts the data frame from the converted x.
+```{}
+y = as.factor(y):
+```
+Converts the target variable y to a factor.
+```{}
+if (importance) { ... }:
+```
+
+If importance is TRUE, performs feature selection using cross-validation.
+```{}
+if (is.null(lambda)) { ... }:
+```
+If lambda is NULL, sets it to a default value of 0.01.
+```{}
+if(type == "class"){ ... } else { ... }:
+```
+If type is "class", fits a classification model using glmnet with family "binomial" for binary classification or "multinomial" for multiclass classification. Otherwise, fits a regression model.
+```{}
+result = list(fit = fit, coef = coef(fit), selectedFeatures = colnames(x)):
+```
+Creates a list containing the fitted model (fit), coefficients (coef), and selected features (selectedFeatures).
+```{}
+return(result):
+```
+Returns the result.
+
+
+
+----------------------------------------------------------
+**ElasticNet Regression**
+-----------------------------------------------------------
+
+The elastic_net_regression() function, combining the strengths of Lasso and Ridge regression to achieve optimal model performance.
+
+Description:
+
+```{}
+elastic_net_regression <- function(x, y, alpha = 0.5, lambda = NULL, importance = FALSE, type = "default", nfolds = 5, ignoreWarnings = TRUE) {
+
+```
+
+This line defines a function named elastic_net_regression that takes several parameters:
+
+* x: Predictor variables.
+* y: Response variable.
+* alpha: The elastic net mixing parameter, with default value 0.5.
+* lambda: Regularization parameter. Default is NULL.
+* importance: Logical indicating whether to perform feature selection. Default is FALSE.
+* type: Type of analysis. Default is "default".
+* nfolds: Number of folds for cross-validation. Default is 5.
+* ignoreWarnings: Logical indicating whether to ignore warnings. Default is TRUE.
+
+```{}
+ if (!is.numeric(alpha)) { stop("alpha parameter must be a numeric value") }:
+```
+
+Checks if alpha is numeric. If not, it stops the execution and throws an error message.
+```{}
+ if (!is.null(lambda) && !is.numeric(lambda)) { stop("lambda parameter must be a numeric value") }:
+```
+
+Checks if lambda is numeric. If not, it stops the execution and throws an error message.
+
+```{}
+if(!is.character(type)){ stop("parameter 'type' must be a string. One of ('default', 'class')") }:
+```
+
+Checks if type is a character string. If not, it stops the execution and throws an error message.
+
+```{}
+if(!is.logical(importance)){ stop("parameter 'importance' must be of type logical TRUE/FALSE") }:
+```
+
+Checks if importance is logical. If not, it stops the execution and throws an error message.
+
+```{}
+if(!is.numeric(nfolds)){ stop("parameter 'nfolds' must be of type numeric.") }:
+```
+
+Checks if nfolds is numeric. If not, it stops the execution and throws an error message.
+
+```{}
+if(is.matrix(x)){ x = data.frame(x) }:
+```
+
+Checks if x is a matrix. If it is, converts it into a data frame.
+```{}
+x <- convertCatToNumeric(x, intercept = FALSE):
+```
+
+Converts categorical variables in x to numeric format.
+
+```{}
+x <- x$data:
+```
+Extracts the data frame from the converted x.
+
+```{}
+if ( type == "class" & length(unique(y)) >= 2) { y <- as.factor(y) }:
+```
+Converts the target variable to a factor if type is "class" and the number of unique classes is greater than or equal to 2.
+
+```{}
+if (importance) { ... }:
+```
+If importance is TRUE, performs feature selection using cross-validation.
+
+```{}
+if (is.null(lambda)) { ... }:
+```
+If lambda is NULL, sets it to a default value of 0.01.
+```{}
+if(type == "class"){ ... } else { ... }:
+```
+If type is "class", fits a classification model using glmnet with family "binomial" for binary classification or "multinomial" for multiclass classification. Otherwise, fits a regression model.
+```{}
+result = list(fit = fit, coef = coef(fit), selectedFeatures = colnames(x)):
+```
+Creates a list containing the fitted model (fit), coefficients (coef), and selected features (selectedFeatures).
+```{}
+return(result):
+```
+Returns the result.
+
+
+## Sample Data
+
+```{r}
+set.seed(123)
+x <- matrix(rnorm(100 * 10), ncol = 10)
+y <- 2 * rowSums(x[, 1:5]) + rnorm(100)
+df <- data.frame(x, y)
+
+
+```
+
+
+
+-------------------------------------------------------------------------------
+**Ridge Regression**
+-------------------------------------------------------------------------------
+
+Ridge Regression: Ridge regression adds a penalty term (L2 regularization) to the linear regression objective function, which helps to shrink the coefficients towards zero, reducing their variance. The ridgeRegression() function implements Ridge regression.
+
+Description:
+
+```{}
+ridge_regression <- function(x, y, alpha = 1, lambda = NULL, importance = FALSE, type = "default", nfolds = 10, ignoreWarnings = TRUE) {
+
+```
+
+
+This line defines a function named ridge_regression that takes several parameters:
+
+*  x: Predictor variables.
+*  y: Response variable.
+*  alpha: The elastic net mixing parameter, with default value 1.
+*  lambda: Regularization parameter. Default is NULL.
+*  importance: Logical indicating whether to perform feature selection. Default is FALSE.
+*  type: Type of analysis. Default is "default".
+*  nfolds: Number of folds for cross-validation. Default is 10.
+*  ignoreWarnings: Logical indicating whether to ignore warnings. Default is TRUE.
+
+```{}
+if (!is.numeric(alpha)) { stop("alpha parameter must be a numeric value") }:
+```
+Checks if alpha is numeric. If not, it stops the execution and throws an error message.
+
+```{}
+if (!is.null(lambda) && !is.numeric(lambda)) { stop("lambda parameter must be a numeric value") }:
+```
+Checks if lambda is numeric. If not, it stops the execution and throws an error message.
+
+```{}
+if(!is.character(type)){ stop("parameter 'type' must be a string. One of ('default', 'class')") }:
+```
+Checks if type is a character string. If not, it stops the execution and throws an error message.
+
+```{}
+if(type != "class"){ stop("Logistic regression only supports type = class") }:
+```
+Checks if type is "class". If not, it stops the execution and throws an error message.
+
+```{}
+if(!is.logical(importance)){ stop("parameter 'importance' must be of type logical TRUE/FALSE") }:
+```
+Checks if importance is logical. If not, it stops the execution and throws an error message.
+
+```{}
+if(!is.numeric(nfolds)){ stop("parameter 'nfolds' must be of type numeric.") }:
+```
+Checks if nfolds is numeric. If not, it stops the execution and throws an error message.
+
+```{}
+if(is.matrix(x)){ x = data.frame(x) }:
+```
+
+Checks if x is a matrix. If it is, converts it into a data frame.
+
+```{}
+x <- convertCatToNumeric(x, intercept = FALSE):
+```
+
+Converts categorical variables in x to numeric format.
+
+```{}
+x <- x$data:
+```
+Extracts the data frame from the converted x.
+
+```{}
+y = as.factor(y):
+```
+Converts the target variable y to a factor.
+
+```{}
+if (importance) { ... }:
+```
+If importance is TRUE, performs feature selection using cross-validation.
+```{}
+if (is.null(lambda)) { ... }:
+```
+If lambda is NULL, sets it to a default value of 0.01.
+```{}
+if(type == "class"){ ... } else { ... }:
+```
+If type is "class", fits a classification model using glmnet with family "binomial" for binary classification or "multinomial" for multiclass classification. Otherwise, fits a regression model.
+```{}
+result = list(fit = fit, coef = coef(fit), selectedFeatures = colnames(x)):
+```
+Creates a list containing the fitted model (fit), coefficients (coef), and selected features (selectedFeatures).
+```{}
+return(result):
+```
+Returns the result.
+
+
+## Sample Data:
+
+
+```{r}
+set.seed(123)
+x <- matrix(rnorm(100 * 10), ncol = 10)
+y <- 2 * rowSums(x[, 1:5]) + rnorm(100)
+df <- data.frame(x, y)
+
+
+```
+
+
+
+-------------------------------------------------------------------------------
+**Lasso Regression**
+------------------------------------------------------------------------------
+Lasso regression adds a penalty term (L1 regularization) to the linear regression objective function. It tends to shrink some coefficients to exactly zero, effectively performing variable selection. The lasso_regression() function implements Lasso regression.
+
+Description: 
+```{}
+lasso_regression <- function(x, y, alpha = 1, lambda = NULL, importance = FALSE, type = "default", nfolds = 10, ignoreWarnings = TRUE) {
+
+```
+
+
+
+This line defines a function named lasso_regression that takes several parameters:
+
+
+*  x: Predictor variables.
+
+*  y: Response variable.
+
+*  alpha: The elastic net mixing parameter, with default value 1.
+
+*  lambda: Regularization parameter. Default is NULL.
+
+*  importance: Logical indicating whether to perform feature selection. Default is FALSE.
+
+
+*  type: Type of analysis. Default is "default".
+
+
+*  nfolds: Number of folds for cross-validation. Default is 10.
+
+
+*  ignoreWarnings: Logical indicating whether to ignore warnings. Default is TRUE.
+
+
+
+```{}
+if (!is.numeric(alpha)) { stop("alpha parameter must be a numeric value") }:
+
+```
+
+Checks if alpha is numeric. If not, it stops the execution and throws an error message.
+
+```{}
+if (!is.null(lambda) && !is.numeric(lambda)) { stop("lambda parameter must be a numeric value") }:
+```
+
+Checks if lambda is numeric. If not, it stops the execution and throws an error message.
+
+```{}
+if(!is.character(type)){ stop("parameter 'type' must be a string. One of ('default', 'class')") }:
+```
+Checks if type is a character string. If not, it stops the execution and throws an error message.
+
+```{}
+if(type != "class"){ stop("Logistic regression only supports type = class") }:
+```
+Checks if type is "class". If not, it stops the execution and throws an error message.
+
+```{}
+if(!is.logical(importance)){ stop("parameter 'importance' must be of type logical TRUE/FALSE") }:
+```
+Checks if importance is logical. If not, it stops the execution and throws an error message.
+
+```{}
+if(!is.numeric(nfolds)){ stop("parameter 'nfolds' must be of type numeric.") }:
+```
+Checks if nfolds is numeric. If not, it stops the execution and throws an error message.
+
+```{}
+if(is.matrix(x)){ x = data.frame(x) }:
+```
+Checks if x is a matrix. If it is, converts it into a data frame.
+
+```{}
+x <- convertCatToNumeric(x, intercept = FALSE):
+```
+Converts categorical variables in x to numeric format.
+```{}
+x <- x$data:
+```
+Extracts the data frame from the converted x.
+
+```{}
+y = as.factor(y):
+```
+Converts the target variable y to a factor.
+```{}
+if (importance) { ... }:
+```
+If importance is TRUE, performs feature selection using cross-validation.
+
+```{}
+if (is.null(lambda)) { ... }:
+```
+If lambda is NULL, sets it to a default value of 0.01.
+
+```{}
+if(type == "class"){ ... } else { ... }:
+```
+If type is "class", fits a classification model using glmnet with family "binomial" for binary classification or "multinomial" for multiclass classification. Otherwise, fits a regression model.
+
+```{}
+result = list(fit = fit, coef = coef(fit), selectedFeatures = colnames(x)):
+```
+Creates a list containing the fitted model (fit), coefficients (coef), and selected features (selectedFeatures).
+
+```{}
+return(result):
+```
+Returns the result.
+
+
+
+## Sample Data
+
+```{r}
+set.seed(123)
+x <- matrix(rnorm(100 * 10), ncol = 10)
+y <- 2 * rowSums(x[, 1:5]) + rnorm(100)
+df <- data.frame(x, y)
+
+```
+
+-------------------------------------------------------------------------------
+**Prediction Regression**
+-------------------------------------------------------------------------------
+
+
+Description:
+
+```{}
+predict_regression <- function(coefficients, newdata) {
+
+```
+
+This function computes predictions based on the coefficients of a regression model and new data.
+
+*  coefficients: Coefficients of the regression model.
+*  newdata: New data for prediction.
+ 
+```{}
+if (is.data.frame(coefficients)) {
+    coefficients <- as.matrix(coefficients)
+}:
+```
+Checks if coefficients is a data frame and converts it to a matrix if necessary.
+
+```{}
+# Add a column of ones for the intercept term if not present
+if (ncol(newdata) + 1 == nrow(coefficients)) {
+    newdata <- cbind(1, newdata)
+}:
+```
+
+Checks if the number of columns in newdata plus one equals the number of rows in coefficients. If true, it adds a column of ones for the intercept term.
+
+
+```{}
+# Check if y is a data frame and convert it to a matrix if necessary
+if (!is.matrix(newdata)) {
+    newdata <- as.matrix(newdata)
+}:
+```
+Checks if newdata is a matrix. If not, converts it to a matrix.
+
+
+```{}
+# Make predictions
+predictions <- newdata %*% coefficients:
+
+```
+Computes predictions by multiplying newdata with coefficients.
+
+```{}
+# Convert predictions to a vector
+predictions <- as.vector(predictions):
+```
+
+Converts predictions to a vector.
+
+
+```{}
+# Return predictions
+return(predictions):
+```
+Returns the predictions.
+
+
+-------------------------------------------------------------------------------
+**Support Vector Machines**
+-------------------------------------------------------------------------------
+
+The svmModel() function supports different kernel functions such as radial basis function (RBF) and linear kernels.
+
+
+Description:
+
+```{}
+svmModel <- function(data, importance = FALSE, responseVariable, kernel = "radial", type = "default", cost = 1, gamma = NULL, epsilon = 0.1, degree = 3, coef0 = 0, nfolds = 10) {
+
+```
+
+This line defines a function named svmModel that takes several parameters:
+
+* data: Data frame containing predictor and response variables.
+* importance: Logical indicating whether to perform feature importance. Default is FALSE.
+* responseVariable: Name of the response variable.
+* kernel: Type of kernel function. Default is "radial".
+* type: Type of analysis. Default is "default".
+* cost: Cost parameter for the SVM. Default is 1.
+* gamma: Gamma parameter for radial, polynomial, and sigmoid kernels. Default is NULL.
+* epsilon: Epsilon parameter. Default is 0.1.
+* degree: Degree parameter for polynomial kernels. Default is 3.
+* coef0: Coef0 parameter for polynomial and sigmoid kernels. Default is 0.
+* nfolds: Number of folds for cross-validation. Default is 10.
+
+
+```{}
+if (!is.null(gamma) && !is.numeric(gamma)) {
+    stop("gamma parameter must be numeric")
+}:
+```
+
+Checks if gamma is numeric. If not, throws an error.
+
+
+```{}
+if(!is.logical(importance)){
+    stop("importance parameter accepts only 'logical' type values TRUE/FALSE")
+}:
+```
+
+Checks if importance is logical. If not, throws an error.
+
+
+```{}
+if( !(kernel %in% c("linear", "radial", "polynomial", "sigmoid")) ){
+    stop("Please provide a valid kernel type: ('linear', 'radial', 'polynomial', 'sigmoid')")
+}:
+```
+
+Checks if kernel is valid. If not, throws an error.
+
+```{}
+if(!is.numeric(epsilon)){
+    stop("epsilon parameter accepts only 'numeric' type values ")
+}:
+```
+Checks if epsilon is numeric. If not, throws an error.
+
+
+```{}
+if(!is.numeric(cost)){
+    stop("cost parameter accepts only 'numeric' type values ")
+}:
+```
+
+Checks if cost is numeric. If not, throws an error.
+
+```{}
+if(!is.numeric(coef0)){
+    stop("coef0 parameter accepts only 'numeric' type values ")
+}:
+```
+Checks if coef0 is numeric. If not, throws an error.
+
+```{}
+if(!is.numeric(degree)){
+    stop("degree parameter accepts only 'numeric' type values ")
+}:
+```
+Checks if degree is numeric. If not, throws an error.
+
+```{}
+if(!is.data.frame(data)){
+    stop("data must be a dataframe")
+}:
+```
+Checks if data is a data frame. If not, throws an error.
+```{}
+
+if(!is.character(responseVariable)){
+    stop("parameter 'responseVariable' must be a string")
+}:
+```
+Checks if responseVariable is a character string. If not, throws an error.
+
+```{}
+x = data[, !names(data) %in% responseVariable, drop = FALSE]:
+```
+
+Extracts predictor variables from data.
+```{}
+y = data[, responseVariable, drop = FALSE]:
+```
+
+Extracts the response variable from data.
+
+```{}
+y_copy = as.matrix(y):
+```
+Creates a copy of y as a matrix.
+
+```{}
+x = convertCatToNumeric(x, intercept = FALSE, toDataFrame = FALSE):s
+```
+
+Converts categorical variables in x to numeric format.
+
+```{}
+x = x$data:
+```
+Extracts the data frame from the converted x.
+
+```{}
+x_copy = x:
+```
+
+Creates a copy of x.
+
+```{}
+
+x = scale(x):
+```
+
+Standardizes the predictor variables.
+
+```{}
+svmType = "eps-regression":
+```
+Initializes svmType to "eps-regression".
+
+```{}
+if ( type == "class" & length(unique(y)) >= 2) {
+    y = as.factor(y):
+```
+    Converts y to a factor for classification.
+```{}
+svmType = "C-classification":
+    Changes svmType to "C-classification" for classification.
+} else{
+    y = data.frame(y):
+    Converts y to a data frame if not already.
+}:
+```
+
+Performs necessary data preparation based on the type.
+```{}
+data = cbind(x, y):
+```
+Combines predictor and response variables into a single data frame.
+
+```{}
+if(importance){
+    cv.fit = crossValidation(x_copy, y_copy, alpha = 1, type = type, nfolds = nfolds):
+    ```
+ Performs cross-validation if importance is TRUE.
+    ```{}
+    parameter_grid <- list(...):
+```
+    Creates a parameter grid for tuning based on kernel type.
+    ```{}
+    tune.control = tune.control(sampling = "cross", cross = nfolds):
+```
+    
+
+    Sets up tuning control for cross-validation.
+    
+    ```{}
+    finalData = cbind(data[, cv.fit$features], y):
+    ```
+    
+    Prepares final data for tuning by selecting features.
+    
+```{}
+
+    fit = tune(svm, y ~ ., data = finalData, kernel = kernel, tunecontrol = tune.control, ranges = parameter_grid[[kernel]], type = svmType):
+    Performs model tuning using the tune function.
+    return(fit$best.model):
+    Returns the best model obtained from tuning.
+}:
+```
+Performs feature importance if importance is TRUE.
+
+```{}
+else{
+    if (kernel == "linear") {
+        fit <- svm(y ~ ., data = data, kernel = "linear", cost = cost, epsilon = epsilon):
+```
+      Fits a linear SVM model.
+      
+```{}
+    } else if (kernel == "radial") {
+        if (is.null(gamma)) {
+            fit <- svm(y ~ ., data = data, kernel = "radial", cost = cost, epsilon = epsilon):
+```
+Fits a radial SVM model without specifying gamma.
+
+```{}
+        
+        } else {
+            fit <- svm(y ~ ., data = data, kernel = "radial", cost = cost, gamma = gamma, epsilon = epsilon):
+            
+```
+
+Fits a radial SVM model with specified gamma.
+
+```{}
+        }
+    } else if (kernel == "polynomial") {
+        fit <- svm(y ~ ., data = data, kernel = "polynomial", cost = cost, degree = degree, coef0 = coef0, epsilon = epsilon):
+        
+```
+        Fits a polynomial SVM model.
+
+```{}
+    } else if (kernel == "sigmoid") {
+        fit <- svm(y ~ ., data = data, kernel = "sigmoid", cost = cost, gamma = gamma, coef0 = coef0, epsilon = epsilon):
+```
+        Fits a sigmoid SVM model.
+        
+```{}
+    }
+    return(fit):
+```
+
+
+Returns the fitted SVM model. Performs model fitting and returns the result.
+
+
+
+---------------------------------------------------------------------------------
+**Cross-Validation**
+---------------------------------------------------------------------------------
+
+The crossValidation() function evaluates model performance robustly using k-fold cross-validation techniques. It provides insights into model generalization and identifying optimal hyperparameters.
+
+Description: 
+
+
+```{}
+crossValidation <- function(x, y, alpha = 1, lambda = NULL, nfolds = 10, type = "default"){
+
+```
+
+This line defines a function named crossValidation that performs cross-validation for regularization parameters.
+
+* x: Predictor variables.
+
+* y: Response variable.
+
+* alpha: The elastic net mixing parameter, with default value 1.
+
+* lambda: Regularization parameter. Default is NULL.
+
+* nfolds: Number of folds for cross-validation. Default is 10.
+
+* type: Type of analysis. Default is "default".
+
+```{}
+if (!is.numeric(alpha)) {
+    stop("alpha parameter must be a numeric value")
+}:
+```
+Checks if alpha is numeric. If not, throws an error.
+
+```{}
+if (!is.null(lambda) && !is.numeric(lambda)) {
+    stop("lambda parameter must be a numeric value")
+}:
+```
+
+
+Checks if lambda is numeric. If not, throws an error.
+
+```{}
+if(!is.data.frame(x) & is.matrix(x)){
+    x = data.frame(x)
+}:
+
+```
+
+
+Checks if x is a matrix. If it is, converts it into a data frame.
+
+
+```{}
+x <- convertCatToNumeric(x, intercept = FALSE):
+```
+Converts categorical variables in x to numeric format.
+
+```{}
+x <- x$data:
+```
+Extracts the data frame from the converted x.
+
+```{}
+if ( type == "class" & length(unique(y)) >= 2) {
+    y <- as.factor(y):
+    
+```
+  Converts the target variable y to a factor for classification if there are at least 2 unique classes.
+}:Checks if type is "class" and the number of unique classes in y is at least 2.
+
+```{}
+if(type == "class"){
+    if (length(unique(y)) == 2) {
+        # Binary classification
+        fit <- cv.glmnet(x, y, family = "binomial", alpha = alpha, type.measure = type, nfolds = nfolds):
+```
+        Performs cross-validated elastic net regression for binary classification.
+    } 
+
+```{}
+else {
+        # Multiclass classification
+        fit <- cv.glmnet(x, y, family = "multinomial", alpha = alpha, type.measure = type, nfolds = nfolds):
+        
+```
+        Performs cross-validated elastic net regression for multiclass classification.
+        
+```{}
+    }
+} else {
+    fit <- cv.glmnet(x, y, alpha = alpha, nfolds = nfolds):
+    
+```
+    Performs cross-validated elastic net regression for regression or default analysis.Fits the model using cv.glmnet with appropriate parameters.
+
+```{}
+best_lambda <- fit$lambda.min:
+```
+
+
+Retrieves the best lambda value selected during cross-validation.
+
+```{}
+selectedFeatures = getInformativePredictors(fit):
+```
+
+Identifies the most informative predictors based on the fitted model.
+
+```{}
+cat("Most Informative Predictors: \n", selectedFeatures):
+```
+
+Displays the most informative predictors.
+
+```{}
+return(list(fit = fit, bestLambda = best_lambda, features = selectedFeatures, alpha = alpha, nfolds = nfolds, type = type)):
+```
+Returns a list containing the fitted model, best lambda value, selected features, and other relevant information.
